@@ -603,7 +603,11 @@ Cannot read the previousTitle for a route that has not yet been installed''',
 
         case Transition.cupertino:
           return CupertinoPageTransition(
-              primaryRouteAnimation: animation,
+              // 用 iosAnimation（未套 GetX 曲线的那条）：
+              // CupertinoPageTransition 内部自带 fastEaseInToSlowEaseOut，
+              // 再套一层 easeOutQuad 会让页面在前 1/5 时间内就冲到终点，
+              // iOS 的滑动感完全看不出来
+              primaryRouteAnimation: iosAnimation,
               secondaryRouteAnimation: secondaryAnimation,
               linearTransition: linearTransition,
               child: GetBackGestureDetector<T>(

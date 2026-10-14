@@ -27,7 +27,7 @@ class MenuView extends GetView<CatalogController> {
       _MenuItem('路由过渡', '16 种 Transition 逐个预览',
           Icons.animation, Routes.transitions),
       _MenuItem('嵌套路由', 'GetRouterOutlet + 中间件 + GetWidget',
-          Icons.account_tree_outlined, Routes.root),
+          Icons.account_tree_outlined, Routes.home),
     ]),
     _MenuGroup('浮层与依赖', [
       _MenuItem('浮层', 'Snackbar / Dialog / BottomSheet',

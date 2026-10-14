@@ -306,10 +306,13 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
       //default behavior, all routes participate in root navigator
       return _activePages.map((e) => e.route!);
     } else {
-      //user specified at least one participatesInRootNavigator
-      return res.where(
-        (element) => element.participatesInRootNavigator == true,
-      );
+      // 用户显式声明过 participatesInRootNavigator，根 navigator 只收声明为 true 的页。
+      // 这里必须遍历整条历史而不是只取 currentTreeBranch：
+      // branch 只是「从根到当前页」的那条链，中间压过的页不在里面，
+      // 只看 branch 会把历史丢掉，栈塌成当前这一页（压第二层时第一层直接消失）。
+      return _activePages
+          .map((e) => e.route!)
+          .where((element) => element.participatesInRootNavigator == true);
     }
   }
 
@@ -405,6 +408,9 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
       fullscreenDialog: fullscreenDialog,
       bindings: bindings,
       transitionDuration: duration ?? Get.defaultTransitionDuration,
+      // 匿名 widget 页是顶层页，要待在根 navigator，
+      // 否则会落进 outlet，藏在「从壳里跳出去的顶层页」底下
+      participatesInRootNavigator: true,
       preventDuplicateHandlingMode: preventDuplicateHandlingMode,
     );
 
@@ -446,6 +452,9 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
       fullscreenDialog: fullscreenDialog,
       bindings: bindings,
       transitionDuration: duration ?? Get.defaultTransitionDuration,
+      // 匿名 widget 页是顶层页，要待在根 navigator，
+      // 否则会落进 outlet，藏在「从壳里跳出去的顶层页」底下
+      participatesInRootNavigator: true,
     );
 
     final args = _buildPageSettings(routeName, arguments);
@@ -482,6 +491,9 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
       fullscreenDialog: fullscreenDialog,
       bindings: bindings,
       transitionDuration: duration ?? Get.defaultTransitionDuration,
+      // 匿名 widget 页是顶层页，要待在根 navigator，
+      // 否则会落进 outlet，藏在「从壳里跳出去的顶层页」底下
+      participatesInRootNavigator: true,
     );
 
     final args = _buildPageSettings(routeName, arguments);

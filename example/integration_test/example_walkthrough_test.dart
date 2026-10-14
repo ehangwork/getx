@@ -189,10 +189,10 @@ void main() {
     expect(find.text('defaultDialog'), findsOneWidget);
     expect(find.text('确认要继续吗？'), findsOneWidget);
     await tapText(tester, '确定');
-    // 5.0-rc 的 defaultDialog 点确定 / 取消都不会自动关闭，只能点屏障
-    expect(find.text('defaultDialog'), findsOneWidget);
-    await tester.tapAt(const Offset(20, 20));
     await settle(tester);
+    // 历史栈修好之后，Get.back 会真的把那一页从声明式 pages 里摘掉；
+    // Flutter 的 _updatePages 删页时会顺带丢弃夹在中间的命令式路由（dialog 是命令式的），
+    // 所以 defaultDialog 点确定现在会正常关闭——修之前这里是不关的。
     expect(find.text('defaultDialog'), findsNothing);
 
     await tapText(tester, 'Get.defaultDialog + content');
