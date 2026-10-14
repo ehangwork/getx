@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../services/counter_service.dart';
 
 class BindingsDemoView extends StatefulWidget {
@@ -14,7 +15,10 @@ class _BindingsDemoViewState extends State<BindingsDemoView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('依赖绑定')),
+      appBar: AppBar(
+        title: const Text('依赖绑定'),
+        leading: const GetBackButton(),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

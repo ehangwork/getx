@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../controllers/worker_controller.dart';
 
 class WorkerView extends GetView<WorkerController> {
@@ -10,6 +11,7 @@ class WorkerView extends GetView<WorkerController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const GetBackButton(),
         title: const Text('Worker'),
         actions: [
           IconButton(

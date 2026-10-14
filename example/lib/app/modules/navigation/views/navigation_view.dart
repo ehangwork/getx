@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
 import 'navigation_target_view.dart';
 
@@ -13,7 +14,10 @@ class NavigationView extends StatelessWidget {
     final inline = () => const NavigationTargetView(label: 'inline target');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('路由跳转')),
+      appBar: AppBar(
+        title: const Text('路由跳转'),
+        leading: const GetBackButton(),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

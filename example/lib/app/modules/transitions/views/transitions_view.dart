@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../../navigation/views/navigation_target_view.dart';
 
 /// Transition 枚举的每一项都对应 routes/default_transitions.dart 里的一个
@@ -30,7 +31,10 @@ class TransitionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('路由过渡')),
+      appBar: AppBar(
+        title: const Text('路由过渡'),
+        leading: const GetBackButton(),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../../shared/widgets/get_back_button.dart';
 import '../../domain/entity/country_model.dart';
 import '../controllers/details_controller.dart';
 
@@ -37,6 +38,7 @@ class CountryDetailsView extends GetView<DetailsController> {
           child: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
+              leading: const GetBackButton(),
               title: Text(
                 args.country,
                 style: TextStyle(

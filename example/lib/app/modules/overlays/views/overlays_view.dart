@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
+import '../../../../shared/widgets/get_back_button.dart';
 
 /// Snackbar / Dialog / BottomSheet 三类浮层的入口。
 /// 全部走 Get 的全局方法，不需要从当前页面的 context 里拿 Navigator。
@@ -9,7 +10,10 @@ class OverlaysView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('浮层')),
+      appBar: AppBar(
+        title: const Text('浮层'),
+        leading: const GetBackButton(),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

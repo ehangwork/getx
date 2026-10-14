@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
+import '../../../../shared/widgets/get_back_button.dart';
 
 /// 被路由跳转反复推入的目标页，用来观察 arguments / parameters /
 /// currentRoute 在不同跳转方式下的差别。
@@ -11,7 +12,10 @@ class NavigationTargetView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(label ?? '目标页')),
+      appBar: AppBar(
+        title: Text(label ?? '目标页'),
+        leading: const GetBackButton(),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

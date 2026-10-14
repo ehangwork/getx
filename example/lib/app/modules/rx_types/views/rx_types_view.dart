@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../controllers/rx_types_controller.dart';
 
 class RxTypesView extends GetView<RxTypesController> {
@@ -9,7 +10,10 @@ class RxTypesView extends GetView<RxTypesController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rx 类型')),
+      appBar: AppBar(
+        title: const Text('Rx 类型'),
+        leading: const GetBackButton(),
+      ),
       body: Obx(
         () => ListView(
           padding: const EdgeInsets.all(16),

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../controllers/counter_controller.dart';
 
 /// 三种订阅方式并排对照：
@@ -14,7 +15,10 @@ class StatefulView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('GetX / GetBuilder / Obx')),
+      appBar: AppBar(
+        title: const Text('GetX / GetBuilder / Obx'),
+        leading: const GetBackButton(),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: const [

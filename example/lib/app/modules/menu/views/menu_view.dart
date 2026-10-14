@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
 
 /// 示例总目录。左侧的图标按能力分类，方便一眼看出这个 fork 覆盖了什么。
@@ -46,6 +47,7 @@ class MenuView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const GetBackButton(),
         title: const Text('GetX 示例'),
         actions: [
           IconButton(

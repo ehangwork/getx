@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../controllers/lifecycle_controller.dart';
 
 /// 生命周期回调由系统触发，页面上再补几个按钮把行为手动触发一遍，
@@ -11,7 +12,10 @@ class LifecycleView extends GetView<LifecycleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('App 生命周期')),
+      appBar: AppBar(
+        title: const Text('App 生命周期'),
+        leading: const GetBackButton(),
+      ),
       body: Column(
         children: [
           Padding(

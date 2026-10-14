@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../controllers/instance_controller.dart';
 
 class InstanceView extends GetView<InstanceController> {
@@ -9,7 +10,10 @@ class InstanceView extends GetView<InstanceController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('实例管理')),
+      appBar: AppBar(
+        title: const Text('实例管理'),
+        leading: const GetBackButton(),
+      ),
       body: Column(
         children: [
           Padding(
