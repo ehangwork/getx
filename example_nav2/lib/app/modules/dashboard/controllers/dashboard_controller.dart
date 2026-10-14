@@ -4,14 +4,21 @@ import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
   final now = DateTime.now().obs;
+
+  Timer? _clock;
+
   @override
   void onReady() {
     super.onReady();
-    Timer.periodic(
+    _clock = Timer.periodic(
       const Duration(seconds: 1),
-      (timer) {
-        now.value = DateTime.now();
-      },
+      (_) => now.value = DateTime.now(),
     );
+  }
+
+  @override
+  void onClose() {
+    _clock?.cancel();
+    super.onClose();
   }
 }

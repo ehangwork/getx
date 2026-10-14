@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 import '../../../get_core/src/get_main.dart';
 import '../../../get_instance/src/bindings_interface.dart';

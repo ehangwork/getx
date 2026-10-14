@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 import '../../../get_instance/src/bindings_interface.dart';
 import '../../../get_state_manager/src/simple/get_state.dart';

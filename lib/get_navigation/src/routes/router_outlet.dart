@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../get_core/src/get_main.dart';
 import '../extension_navigation.dart';

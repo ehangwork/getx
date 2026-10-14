@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get_navigation/src/routes/test_kit.dart';
 
 import '../../get_core/src/flutter_engine.dart';

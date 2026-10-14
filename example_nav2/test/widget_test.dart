@@ -1,28 +1,51 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:example_nav2/app/routes/app_pages.dart';
+import 'package:example_nav2/services/auth_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    // await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('nav2 app mounts and reaches the root route hosting the nested tree',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      GetMaterialApp(
+        binds: [Bind.put(AuthService())],
+        getPages: AppPages.routes,
+        initialRoute: AppPages.initial,
+      ),
+    );
     await tester.pump();
+    // 抽屉与路由过渡会留下未触发的定时器，把时间轴推到底再收尾
+    await tester.pump(const Duration(seconds: 2));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(GetMaterialApp), findsOneWidget);
+    expect(Get.currentRoute, '/');
+  });
+
+  test('nested route table exposes every documented path', () {
+    final paths = <String>{};
+
+    void collect(List<GetPage> pages, String prefix) {
+      for (final page in pages) {
+        final full = '$prefix${page.name}';
+        paths.add(full);
+        if (page.children.isNotEmpty) {
+          collect(page.children, full);
+        }
+      }
+    }
+
+    collect(AppPages.routes, '');
+
+    // 嵌套路由的完整路径是父路径与子路径直接拼接，根路由自身贡献一个 '/'
+    expect(paths, containsAll(<String>[
+      '/',
+      '//login',
+      '//home',
+      '//settings',
+      '//home/dashboard',
+      '//home/profile',
+      '//home/products',
+      '//home/products/:productId',
+    ]));
   });
 }
