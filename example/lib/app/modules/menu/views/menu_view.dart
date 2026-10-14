@@ -4,9 +4,10 @@ import 'package:get/get.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
+import '../controllers/catalog_controller.dart';
 
 /// 示例总目录。左侧的图标按能力分类，方便一眼看出这个 fork 覆盖了什么。
-class MenuView extends StatelessWidget {
+class MenuView extends GetView<CatalogController> {
   const MenuView({super.key});
 
   static const _groups = <_MenuGroup>[
@@ -51,12 +52,14 @@ class MenuView extends StatelessWidget {
         leading: const GetBackButton(),
         title: const Text('GetX 示例'),
         actions: [
-          IconButton(
-            tooltip: '切换主题',
-            onPressed: () => Get.changeTheme(
-              Get.isDarkMode ? ThemeData.light() : ThemeData.dark(),
+          Obx(
+            () => IconButton(
+              tooltip: '切换主题',
+              onPressed: controller.toggleTheme,
+              icon: Icon(
+                controller.isDark ? Icons.light_mode : Icons.dark_mode,
+              ),
             ),
-            icon: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode),
           ),
         ],
       ),

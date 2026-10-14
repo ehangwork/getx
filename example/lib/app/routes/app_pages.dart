@@ -17,6 +17,7 @@ import '../modules/lifecycle/bindings/lifecycle_binding.dart';
 import '../modules/lifecycle/views/lifecycle_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/menu/bindings/catalog_binding.dart';
 import '../modules/menu/views/menu_view.dart';
 import '../modules/navigation/views/navigation_target_view.dart';
 import '../modules/navigation/views/navigation_view.dart';
@@ -63,6 +64,7 @@ class AppPages {
         GetPage(
           name: Routes.menu,
           page: () => const MenuView(),
+          binding: CatalogBinding(),
         ),
         GetPage(
           name: Routes.login,
@@ -125,58 +127,70 @@ class AppPages {
       page: () => const CountryListView(),
       binding: CountryListBinding(),
       transition: Transition.fadeIn,
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.countryDetails,
       page: () => const CountryDetailsView(),
       binding: CountryDetailsBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.stateful,
       page: () => const StatefulView(),
       binding: CounterBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.rxTypes,
       page: () => const RxTypesView(),
       binding: RxTypesBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.workers,
       page: () => const WorkerView(),
       binding: WorkerBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.pagination,
       page: () => const PaginationView(),
       binding: PaginationBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.lifecycle,
       page: () => const LifecycleView(),
       binding: LifecycleBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.instance,
       page: () => const InstanceView(),
       binding: InstanceBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.bindings,
       page: () => const BindingsDemoView(),
       binding: BindingsDemoBinding(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.overlays,
       page: () => const OverlaysView(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.navigation,
       page: () => const NavigationView(),
+      participatesInRootNavigator: true,
     ),
     GetPage(
       name: Routes.transitions,
       page: () => const TransitionsView(),
+      participatesInRootNavigator: true,
     ),
 
     // 过渡与跳转示例共用的落点页
@@ -184,6 +198,7 @@ class AppPages {
       name: Routes.transitionTarget,
       page: () => const NavigationTargetView(),
       transition: Transition.downToUp,
+      participatesInRootNavigator: true,
     ),
   ];
 }

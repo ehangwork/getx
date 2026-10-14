@@ -17,6 +17,11 @@ class RootView extends GetView<RootController> {
     return GetRouterOutlet(
       initialRoute: Routes.menu,
       anchorRoute: Routes.root,
+      // 扁平模块页声明了 participatesInRootNavigator: true，
+      // 它们和壳一起待在根 navigator 的真实栈里。
+      // 不在这里滤掉的话 outlet 会把同一页再渲染一遍。
+      filterPages: (pages) =>
+          pages.where((page) => page.participatesInRootNavigator != true),
     );
   }
 }
