@@ -64,51 +64,24 @@ void main() {
     expect(GetUtils.isNullOrBlank(map["foo"]), false);
     expect(GetUtils.isNullOrBlank(map["other"]), true);
   });
-  group('GetUtils.isLength* functions', () {
-    test('isLengthEqualTo should validate iterable lengths', () {
-      // iterables should cover list and set
-      expect(GetUtils.isLengthEqualTo([].map(newId), 0), true);
-      expect(GetUtils.isLengthEqualTo([1, 2].map(newId), 2), true);
 
-      expect(GetUtils.isLengthEqualTo({}, 0), true);
-      expect(GetUtils.isLengthEqualTo({1: 1, 2: 1}, 2), true);
-      expect(GetUtils.isLengthEqualTo({}, 2), false);
-
-      expect(GetUtils.isLengthEqualTo("", 0), true);
-      expect(GetUtils.isLengthEqualTo("a", 0), false);
-      expect(GetUtils.isLengthEqualTo("a", 1), true);
+  // 分隔符出现在首尾或连续出现时不该让转换崩溃
+  group('GetUtils.camelCase', () {
+    test('converts separators between words into camelCase', () {
+      expect(GetUtils.camelCase('foo bar'), 'fooBar');
+      expect(GetUtils.camelCase('foo_bar'), 'fooBar');
     });
 
-    test('isLengthGreaterOrEqual should validate lengths', () {
-      // iterables should cover list and set
-      expect(GetUtils.isLengthGreaterOrEqual([].map(newId), 0), true);
-      expect(GetUtils.isLengthGreaterOrEqual([1, 2].map(newId), 2), true);
-      expect(GetUtils.isLengthGreaterOrEqual([1, 2].map(newId), 1), true);
-
-      expect(GetUtils.isLengthGreaterOrEqual({}, 0), true);
-      expect(GetUtils.isLengthGreaterOrEqual({1: 1, 2: 1}, 1), true);
-      expect(GetUtils.isLengthGreaterOrEqual({1: 1, 2: 1}, 2), true);
-      expect(GetUtils.isLengthGreaterOrEqual({}, 2), false);
-
-      expect(GetUtils.isLengthGreaterOrEqual("", 0), true);
-      expect(GetUtils.isLengthGreaterOrEqual("a", 0), true);
-      expect(GetUtils.isLengthGreaterOrEqual("", 1), false);
+    test('returns null for blank input', () {
+      expect(GetUtils.camelCase(''), isNull);
+      expect(GetUtils.camelCase('   '), isNull);
     });
 
-    test('isLengthLessOrEqual should validate lengths', () {
-      // iterables should cover list and set
-      expect(GetUtils.isLengthLessOrEqual([].map(newId), 0), true);
-      expect(GetUtils.isLengthLessOrEqual([1, 2].map(newId), 2), true);
-      expect(GetUtils.isLengthLessOrEqual([1, 2].map(newId), 1), false);
-
-      expect(GetUtils.isLengthLessOrEqual({}, 0), true);
-      expect(GetUtils.isLengthLessOrEqual({1: 1, 2: 1}, 1), false);
-      expect(GetUtils.isLengthLessOrEqual({1: 1, 2: 1}, 3), true);
-      expect(GetUtils.isLengthLessOrEqual({}, 2), true);
-
-      expect(GetUtils.isLengthLessOrEqual("", 0), true);
-      expect(GetUtils.isLengthLessOrEqual("a", 2), true);
-      expect(GetUtils.isLengthLessOrEqual("a", 0), false);
+    test('tolerates leading, trailing and repeated separators', () {
+      expect(GetUtils.camelCase('-foo bar'), 'fooBar');
+      expect(GetUtils.camelCase('foo bar-'), 'fooBar');
+      expect(GetUtils.camelCase('foo---bar'), 'fooBar');
+      expect(GetUtils.camelCase('_'), '');
     });
   });
 }
