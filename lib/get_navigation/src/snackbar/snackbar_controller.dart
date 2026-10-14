@@ -4,7 +4,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../get.dart';
+import '../../../get_core/src/get_main.dart';
+import '../../../get_utils/src/queue/get_queue.dart';
+import '../extension_navigation.dart';
+import 'snackbar.dart';
 import '../root/get_root.dart';
 
 class SnackbarController {

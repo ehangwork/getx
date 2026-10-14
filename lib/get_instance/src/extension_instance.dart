@@ -37,8 +37,19 @@ extension ResetInstance on GetInterface {
   ///
   bool resetInstance({bool clearRouteBindings = true}) {
     //  if (clearFactory) _factory.clear();
-    // deleteAll(force: true);
     if (clearRouteBindings) RouterReportManager.instance.clearRouteKeys();
+
+    // 直接清表会跳过 onClose，controller 的 Stream / 定时器 / 订阅全部泄漏。
+    // 逐个走 delete 让生命周期正常收尾；同一个实例可能注册在多个 key 下，
+    // 按 identity 去重避免重复触发 onClose。
+    final closed = Set<Object>.identity();
+    for (final key in Inst._singl.keys.toList()) {
+      final dependency = Inst._singl[key]?.dependency;
+      if (dependency != null && !closed.add(dependency)) {
+        continue;
+      }
+      delete(key: key, force: true);
+    }
     Inst._singl.clear();
 
     return true;

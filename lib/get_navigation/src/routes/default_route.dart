@@ -1,6 +1,11 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../get.dart';
+import '../../../get_instance/src/bindings_interface.dart';
+import '../../../get_state_manager/src/simple/get_state.dart';
+import 'custom_transition.dart';
+import 'transitions_type.dart';
+import 'get_transition_mixin.dart';
+import 'route_middleware.dart';
 import '../router_report.dart';
 
 @optionalTypeArgs

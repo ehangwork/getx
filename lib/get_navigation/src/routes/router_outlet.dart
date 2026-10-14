@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../get.dart';
+import '../../../get_core/src/get_main.dart';
+import '../extension_navigation.dart';
+import 'get_navigator.dart';
+import 'get_route.dart';
+import 'page_settings.dart';
+import 'get_router_delegate.dart';
+import 'parse_route.dart';
 
 class RouterOutlet<TDelegate extends RouterDelegate<T>, T extends Object>
     extends StatefulWidget {

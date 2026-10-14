@@ -3,7 +3,19 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/routes/test_kit.dart';
 
-import '../../get.dart';
+import '../../get_core/src/flutter_engine.dart';
+import '../../get_core/src/get_interface.dart';
+import '../../get_core/src/get_main.dart';
+import '../../get_instance/src/bindings_interface.dart';
+import '../../get_utils/src/extensions/internationalization.dart';
+import 'routes/get_navigation_interface.dart';
+import 'routes/get_route.dart';
+import 'routes/get_router_delegate.dart';
+import 'routes/observers/route_observer.dart';
+import 'routes/transitions_type.dart';
+import 'bottomsheet/bottomsheet.dart';
+import 'snackbar/snackbar.dart';
+import 'snackbar/snackbar_controller.dart';
 import 'dialog/dialog_route.dart';
 import 'root/get_root.dart';
 

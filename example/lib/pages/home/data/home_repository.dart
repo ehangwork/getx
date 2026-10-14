@@ -7,21 +7,8 @@ class HomeRepository implements IHomeRepository {
   final IHomeProvider provider;
 
   @override
-  Future<List<CountriesItem>> getCountries() async {
-    final cases = await provider.getCountries();
-    if (cases.status.hasError) {
-      return Future.error(cases.statusText!);
-    } else {
-      return cases.body!;
-    }
-  }
+  Future<List<CountriesItem>> getCountries() => provider.getCountries();
 
-  Future<Country> getCountry(String path) async {
-    final country = await provider.getCountry(path);
-    if (country.status.hasError) {
-      return Future.error(country.statusText!);
-    } else {
-      return country.body!;
-    }
-  }
+  @override
+  Future<Country> getCountry(String path) => provider.getCountry(path);
 }

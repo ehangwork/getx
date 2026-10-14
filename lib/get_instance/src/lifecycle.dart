@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../get.dart';
+import '../../get_core/src/flutter_engine.dart';
 
 /// The [GetLifeCycle]
 ///

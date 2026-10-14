@@ -98,12 +98,17 @@ mixin StatelessObserverComponent on StatelessElement {
   List<Disposer>? disposers = <Disposer>[];
 
   void getUpdate() {
-    // if (disposers != null && !dirty) {
-    //   markNeedsBuild();
-    // }
-    if (disposers != null) {
-      scheduleMicrotask(markNeedsBuild);
+    if (disposers == null) {
+      return;
     }
+    // 微任务真正执行时 element 可能已经被卸载，此时 markNeedsBuild 会命中
+    // Flutter 的 defunct 断言，所以兜底检查必须放在微任务内部而不是调用时
+    scheduleMicrotask(() {
+      if (disposers == null) {
+        return;
+      }
+      markNeedsBuild();
+    });
   }
 
   @override

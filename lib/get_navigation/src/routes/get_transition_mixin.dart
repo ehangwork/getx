@@ -6,7 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../../get.dart';
+import '../../../get_core/src/get_main.dart';
+import '../../../get_utils/src/extensions/context_extensions.dart';
+import '../../../get_utils/src/platform/platform.dart';
+import '../extension_navigation.dart';
+import 'default_route.dart';
+import 'default_transitions.dart';
+import 'transitions_type.dart';
 import '../root/get_root.dart';
 
 const double _kBackGestureWidth = 20.0;

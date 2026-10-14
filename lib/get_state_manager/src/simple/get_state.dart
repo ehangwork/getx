@@ -588,7 +588,14 @@ class BindElement<T> extends InheritedElement {
 
   void getUpdate() {
     _dirty = true;
-    markNeedsBuild();
+    // 与 Obx 保持同一条刷新路径：延到微任务，既避开 build 期间的
+    // markNeedsBuild，也让卸载后到达的通知不会打到 defunct element 上
+    scheduleMicrotask(() {
+      if (_controller == null) {
+        return;
+      }
+      markNeedsBuild();
+    });
   }
 
   @override

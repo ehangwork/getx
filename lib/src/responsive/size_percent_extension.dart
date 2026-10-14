@@ -1,4 +1,5 @@
-import '../../get.dart';
+import '../../get_core/src/get_main.dart';
+import '../../get_navigation/src/extension_navigation.dart';
 
 //Converts a double value to a percentage
 extension PercentSized on double {

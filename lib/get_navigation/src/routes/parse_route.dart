@@ -1,6 +1,13 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../get.dart';
+import '../../../get_core/src/get_main.dart';
+import '../extension_navigation.dart';
+import '../../../get_instance/src/bindings_interface.dart';
+import '../../../get_state_manager/src/simple/get_state.dart';
+import '../../../get_utils/src/extensions/iterable_extensions.dart';
+import 'get_route.dart';
+import 'page_settings.dart';
+import 'route_middleware.dart';
 
 @immutable
 class RouteDecoder {

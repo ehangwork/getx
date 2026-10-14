@@ -33,6 +33,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   get:
     path: ../
+  dio: ^5.7.0
   #get_test: ^3.13.3
 
 dev_dependencies:

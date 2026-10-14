@@ -186,12 +186,17 @@ class Notifier {
 
   T append<T>(NotifyData data, T Function() builder) {
     _notifyData = data;
-    final result = builder();
-    if (data.disposers.isEmpty && data.throwException) {
-      throw const ObxError();
+    try {
+      final result = builder();
+      if (data.disposers.isEmpty && data.throwException) {
+        throw const ObxError();
+      }
+      return result;
+    } finally {
+      // builder 抛异常时也必须复位，否则全局残留会指向一个已失效的 Obx，
+      // 后续任意 reportRead 都会把 listener 挂到错误的 element 上
+      _notifyData = null;
     }
-    _notifyData = null;
-    return result;
   }
 }
 

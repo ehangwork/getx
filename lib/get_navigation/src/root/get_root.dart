@@ -3,8 +3,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/routes/test_kit.dart';
 
-import '../../../get.dart';
+import '../../../get_core/src/flutter_engine.dart';
+import '../../../get_core/src/get_main.dart';
+import '../../../get_core/src/log.dart';
+import '../../../get_core/src/smart_management.dart';
+import '../../../get_instance/src/extension_instance.dart';
+import '../../../get_state_manager/src/simple/get_state.dart';
+import '../../../get_utils/src/extensions/context_extensions.dart';
+import '../../../get_utils/src/extensions/event_loop_extensions.dart';
+import '../../../get_utils/src/extensions/internationalization.dart';
+import '../extension_navigation.dart';
 import '../router_report.dart';
+import '../routes/index.dart';
+import '../snackbar/snackbar_controller.dart';
+import 'internationalization.dart';
 
 class ConfigData {
   final ValueChanged<Routing?>? routingCallback;

@@ -1,6 +1,9 @@
 import 'dart:collection';
 
-import '../../get.dart';
+import '../../get_core/src/get_main.dart';
+import '../../get_core/src/smart_management.dart';
+import '../../get_instance/src/extension_instance.dart';
+import '../../get_instance/src/lifecycle.dart';
 
 class RouterReportManager<T> {
   /// Holds a reference to `Get.reference` when the Instance was

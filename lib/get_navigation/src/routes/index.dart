@@ -16,4 +16,3 @@ export 'route_middleware.dart';
 export 'route_report.dart';
 export 'router_outlet.dart';
 export 'transitions_type.dart';
-export 'url_strategy/url_strategy.dart';

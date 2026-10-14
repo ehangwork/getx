@@ -2,7 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 
-import '../../../get.dart';
+import '../../../get_core/src/get_main.dart';
+import '../../../get_instance/src/bindings_interface.dart';
+import '../extension_navigation.dart';
+import 'default_route.dart';
+import 'get_route.dart';
+import 'page_settings.dart';
+import 'parse_route.dart';
+import 'transitions_type.dart';
 
 /// The Page Middlewares.
 /// The Functions will be called in this order
