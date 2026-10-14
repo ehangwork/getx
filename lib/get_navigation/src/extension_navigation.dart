@@ -73,18 +73,24 @@ extension ExtensionBottomSheet on GetInterface {
 
 /// bottomSheet 要推到「当前页面所在的那个 navigator」上，而不是固定推到根 navigator。
 ///
-/// 嵌套路由下，壳页参与根 navigator，跳转后的页面渲染在壳的 outlet 里，
-/// 位置在壳之下。如果弹层压在根 navigator 上，它就会盖住跳转后的页面；
-/// 推到 outlet 的 navigator 上，跳转才会盖住弹层、返回后弹层又能回来
-/// —— 这才符合「弹层是导航栈里的一层」的预期。
+/// 嵌套路由下有两种「当前页」：
+///   - 声明了 participatesInRootNavigator 的页，和壳一起待在根 navigator 的真实栈里
+///   - 其余页面渲染在壳的 outlet 里
 ///
-/// 扁平路由没有 outlet，落到根 navigator，行为不变。
-/// 显式传 `useRootNavigator: true` 时也仍然走根 navigator。
+/// 判断办法是看根 navigator 的栈深：栈里不止一页时，最上面那页就是当前页，
+/// 浮层必须压在这一层，推到 outlet 会被当前页挡住（表现为「弹层不出现」）；
+/// 只有一页时当前页才在 outlet 里，用最后构建的那层 outlet。
+///
+/// 壳的 outlet 即使被根层盖住也仍然在构建，所以只看「最后构建的 outlet」会指错。
 NavigatorState _bottomSheetNavigator(bool useRootNavigator) {
   if (!useRootNavigator) {
-    final outlet =
-        Get.rootController.rootDelegate.activeOutletKey?.currentState;
-    if (outlet != null && outlet.mounted) return outlet;
+    final root = Get.rootController.rootDelegate.navigatorKey.currentState;
+    // 根 navigator 栈深 > 1：当前页在根层，压在上面
+    if (root == null || !root.canPop()) {
+      final outlet =
+          Get.rootController.rootDelegate.activeOutletKey?.currentState;
+      if (outlet != null && outlet.mounted) return outlet;
+    }
   }
   return Navigator.of(Get.overlayContext!, rootNavigator: true);
 }
