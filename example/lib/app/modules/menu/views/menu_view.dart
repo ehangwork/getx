@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../services/auth_service.dart';
 import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
 
@@ -60,7 +61,7 @@ class MenuView extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(top: 8, bottom: 24),
         children: [
           for (final group in _groups) ...[
             Padding(
@@ -79,9 +80,51 @@ class MenuView extends StatelessWidget {
                 onTap: () => Get.toNamed(item.route),
               ),
           ],
+          const Divider(),
+          const _SettingsTile(),
+          const _AuthTile(),
         ],
       ),
     );
+  }
+}
+
+/// 设置入口。原先放在左侧抽屉里，抽屉去掉后并到目录页。
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.settings_outlined),
+      title: const Text('Settings'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => Get.toNamed(Routes.settings),
+    );
+  }
+}
+
+/// 登录态入口。这里必须用 Obx 包住：裸读 isLoggedInValue 的话，
+/// 登录之后这一项不会跟着切换。
+class _AuthTile extends StatelessWidget {
+  const _AuthTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final loggedIn = AuthService.to.isLoggedInValue;
+      return ListTile(
+        leading: Icon(loggedIn ? Icons.logout : Icons.login),
+        title: Text(loggedIn ? 'Logout' : 'Login'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          if (loggedIn) {
+            AuthService.to.logout();
+          }
+          Get.toNamed(Routes.login);
+        },
+      );
+    });
   }
 }
 

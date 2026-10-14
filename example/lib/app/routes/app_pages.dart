@@ -51,7 +51,7 @@ class AppPages {
 
   static final routes = [
     // ---- 嵌套路由：根 + 两层子路由 ----
-    // 根路由是整个示例的壳（抽屉 + GetRouterOutlet），下面所有页面
+    // 根路由是整个示例的壳（只提供一个 GetRouterOutlet），下面所有页面
     // 都是它的子路由；default child 是示例目录。
     GetPage(
       name: Routes.root,

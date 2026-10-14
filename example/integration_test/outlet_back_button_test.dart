@@ -29,7 +29,7 @@ void main() {
     await settle(tester, frames: 8);
     expect(find.text('GetX 示例'), findsOneWidget);
 
-    // 进二级页：抽屉里的 Home
+    // 进二级页：从目录页的「嵌套路由」入口进 Home
     Get.toNamed(Routes.home);
     await settle(tester, frames: 8);
     expect(find.text('Home'), findsWidgets);

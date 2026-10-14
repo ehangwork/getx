@@ -8,7 +8,7 @@ abstract class Routes {
   /// 示例总目录，所有能力演示的入口
   static const menu = '/menu';
 
-  /// 嵌套路由的根：抽屉 + GetRouterOutlet
+  /// 嵌套路由的根：只提供一个 GetRouterOutlet，不画任何控件
   static const root = '/';
 
   // ---- 嵌套路由的子路径 ----

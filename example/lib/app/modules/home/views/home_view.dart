@@ -23,7 +23,12 @@ class HomeView extends GetView<HomeController> {
             builder: (context) {
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text('Home'),
+                  // RouterListener 的演示放在这儿：HomeView 在三个 tab
+                  // 之间常驻，切 tab 时标题会跟着路由实时变。
+                  // 目录页放不了——它一导航就被卸载，永远只显示初始路径。
+                  title: RouterListener(
+                    builder: (context) => Text('Home · ${context.location}'),
+                  ),
                   leading: const GetBackButton(),
                 ),
                 body: GetRouterOutlet(

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_demo/app/routes/app_pages.dart';
 import 'package:get_demo/main.dart';
+import 'package:get_demo/services/auth_service.dart';
 
 void main() {
   testWidgets('App 启动后落在示例目录', (WidgetTester tester) async {
@@ -24,13 +25,42 @@ void main() {
     expect(find.text('Rx 类型'), findsOneWidget);
     expect(find.text('ScrollMixin 分页'), findsOneWidget);
 
-    // 往下滚到底，浮层与依赖那一组也要在
-    await tester.scrollUntilVisible(find.text('StateController + futurize'), 200);
-    await tester.pumpAndSettle();
+    // 逐段滚逐段断言：一次性断言整页会随列表高度变化而误报
+    Future<void> scrollTo(String text) async {
+      await tester.scrollUntilVisible(find.text(text), 200);
+      await tester.pumpAndSettle();
+    }
 
+    await scrollTo('嵌套路由');
     expect(find.text('嵌套路由'), findsOneWidget);
+
+    await scrollTo('浮层');
     expect(find.text('浮层'), findsOneWidget);
+
+    await scrollTo('StateController + futurize');
     expect(find.text('StateController + futurize'), findsOneWidget);
+
+    // 左侧抽屉删掉后并进来的两个入口
+    await scrollTo('Settings');
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+  });
+
+  testWidgets('目录页的登录入口跟着登录态切换', (WidgetTester tester) async {
+    await tester.pumpWidget(const GetDemoApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await tester.scrollUntilVisible(find.text('Login'), 200);
+    await tester.pumpAndSettle();
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Logout'), findsNothing);
+
+    // 之前抽屉里的这一项是裸读 isLoggedInValue，登录后不会刷新
+    AuthService.to.login();
+    await tester.pumpAndSettle();
+    expect(find.text('Logout'), findsOneWidget);
+    expect(find.text('Login'), findsNothing);
   });
 
   test('路由表把每个常量路径都注册了', () {
