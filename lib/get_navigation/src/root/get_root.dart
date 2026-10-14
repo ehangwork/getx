@@ -16,7 +16,6 @@ import '../extension_navigation.dart';
 import '../router_report.dart';
 import '../routes/index.dart';
 import '../snackbar/snackbar_controller.dart';
-import 'internationalization.dart';
 
 class ConfigData {
   final ValueChanged<Routing?>? routingCallback;
@@ -39,8 +38,6 @@ class ConfigData {
   final List<NavigatorObserver>? navigatorObservers;
   final GlobalKey<NavigatorState>? navigatorKey;
   final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
-  final Map<String, Map<String, String>>? translationsKeys;
-  final Translations? translations;
   final Locale? locale;
   final Locale? fallbackLocale;
   final String? initialRoute;
@@ -82,8 +79,6 @@ class ConfigData {
     required this.navigatorObservers,
     required this.navigatorKey,
     required this.scaffoldMessengerKey,
-    required this.translationsKeys,
-    required this.translations,
     required this.locale,
     required this.fallbackLocale,
     required this.initialRoute,
@@ -125,8 +120,6 @@ class ConfigData {
     List<NavigatorObserver>? navigatorObservers,
     GlobalKey<NavigatorState>? navigatorKey,
     GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey,
-    Map<String, Map<String, String>>? translationsKeys,
-    Translations? translations,
     Locale? locale,
     Locale? fallbackLocale,
     String? initialRoute,
@@ -169,8 +162,6 @@ class ConfigData {
       navigatorObservers: navigatorObservers ?? this.navigatorObservers,
       navigatorKey: navigatorKey ?? this.navigatorKey,
       scaffoldMessengerKey: scaffoldMessengerKey ?? this.scaffoldMessengerKey,
-      translationsKeys: translationsKeys ?? this.translationsKeys,
-      translations: translations ?? this.translations,
       locale: locale ?? this.locale,
       fallbackLocale: fallbackLocale ?? this.fallbackLocale,
       initialRoute: initialRoute ?? this.initialRoute,
@@ -221,8 +212,6 @@ class ConfigData {
         listEquals(other.navigatorObservers, navigatorObservers) &&
         other.navigatorKey == navigatorKey &&
         other.scaffoldMessengerKey == scaffoldMessengerKey &&
-        mapEquals(other.translationsKeys, translationsKeys) &&
-        other.translations == translations &&
         other.locale == locale &&
         other.fallbackLocale == fallbackLocale &&
         other.initialRoute == initialRoute &&
@@ -266,8 +255,6 @@ class ConfigData {
         navigatorObservers.hashCode ^
         navigatorKey.hashCode ^
         scaffoldMessengerKey.hashCode ^
-        translationsKeys.hashCode ^
-        translations.hashCode ^
         locale.hashCode ^
         fallbackLocale.hashCode ^
         initialRoute.hashCode ^
@@ -355,7 +342,6 @@ class GetRootState extends State<GetRoot> with WidgetsBindingObserver {
 
   void onClose() {
     config.onDispose?.call();
-    Get.clearTranslations();
     config.snackBarQueue.disposeControllers();
     RouterReportManager.instance.clearRouteKeys();
     RouterReportManager.dispose();
@@ -414,12 +400,6 @@ class GetRootState extends State<GetRoot> with WidgetsBindingObserver {
 
     if (config.fallbackLocale != null) {
       Get.fallbackLocale = config.fallbackLocale;
-    }
-
-    if (config.translations != null) {
-      Get.addTranslations(config.translations!.keys);
-    } else if (config.translationsKeys != null) {
-      Get.addTranslations(config.translationsKeys!);
     }
 
     Get.smartManagement = config.smartManagement;

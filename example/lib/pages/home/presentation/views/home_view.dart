@@ -27,7 +27,7 @@ class HomeView extends GetView<HomeController> {
             extendBodyBehindAppBar: true,
             appBar: AppBar(
               title: Text(
-                'nobel_by_country'.tr,
+                'Nobel by country',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w200,
@@ -86,7 +86,7 @@ class HomeView extends GetView<HomeController> {
                             : const Locale('en', 'EN'));
                       },
                       child: Text(
-                        'update_language'.tr,
+                        'Update language',
                         style: TextStyle(
                           fontWeight: FontWeight.w200,
                           fontSize: 18,

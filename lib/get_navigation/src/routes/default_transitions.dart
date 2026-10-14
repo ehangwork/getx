@@ -195,15 +195,20 @@ class CircularRevealTransition {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
       Widget child) {
-    return ClipPath(
-      clipper: CircularRevealClipper(
-        fraction: animation.value,
-        centerAlignment: Alignment.center,
-        centerOffset: Offset.zero,
-        minRadius: 0,
-        maxRadius: 800,
-      ),
+    // 必须包在 AnimatedBuilder 里，否则 animation.value 只在 build 时读一次，
+    // 圆形揭示不会随帧刷新
+    return AnimatedBuilder(
+      animation: animation,
       child: child,
+      builder: (context, child) => ClipPath(
+        clipper: CircularRevealClipper(
+          fraction: animation.value,
+          centerAlignment: alignment,
+          centerOffset: Offset.zero,
+          minRadius: 0,
+        ),
+        child: child,
+      ),
     );
   }
 }

@@ -68,12 +68,12 @@ class DetailsView extends GetView<DetailsController> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         InfoRow(
-                          label: 'number_of_prizes'.tr,
+                          label: 'Number of prizes',
                           value: '${country.numberOfPrizes}',
                         ),
                         SizedBox(height: 20),
                         InfoRow(
-                          label: 'average_age_of_laureates'.tr,
+                          label: 'Average age of laureates',
                           value: '${country.averageAgeOfLaureates}',
                         ),
                       ],

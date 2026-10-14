@@ -23,8 +23,6 @@ class GetCupertinoApp extends StatelessWidget {
   final GenerateAppTitle? onGenerateTitle;
   final CustomTransition? customTransition;
   final Color? color;
-  final Map<String, Map<String, String>>? translationsKeys;
-  final Translations? translations;
   final TextDirection? textDirection;
   final Locale? locale;
   final Locale? fallbackLocale;
@@ -80,8 +78,6 @@ class GetCupertinoApp extends StatelessWidget {
     List<NavigatorObserver> this.navigatorObservers =
         const <NavigatorObserver>[],
     this.builder,
-    this.translationsKeys,
-    this.translations,
     this.textDirection,
     this.title = '',
     this.onGenerateTitle,
@@ -156,8 +152,6 @@ class GetCupertinoApp extends StatelessWidget {
     this.scrollBehavior,
     this.actions,
     this.customTransition,
-    this.translationsKeys,
-    this.translations,
     this.textDirection,
     this.fallbackLocale,
     this.routingCallback,
@@ -212,8 +206,6 @@ class GetCupertinoApp extends StatelessWidget {
         scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),
         smartManagement: smartManagement,
         transitionDuration: transitionDuration,
-        translations: translations,
-        translationsKeys: translationsKeys,
         unknownRoute: unknownRoute,
         defaultPopGesture: popGesture,
       ),
