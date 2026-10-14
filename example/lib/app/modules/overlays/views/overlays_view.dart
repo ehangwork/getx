@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
+
 import '../../../../shared/widgets/get_back_button.dart';
 
 /// Snackbar / Dialog / BottomSheet 三类浮层的入口。
@@ -82,8 +83,14 @@ class OverlaysView extends StatelessWidget {
               middleText: '确认要继续吗？',
               textCancel: '取消',
               textConfirm: '确定',
-              onConfirm: () => Get.log('confirmed'),
-              onCancel: () => Get.log('cancelled'),
+              onConfirm: () => {
+                Get.log('confirmed'),
+                Get.closeDialog(),
+              },
+              onCancel: () => {
+                Get.log('cancelled'),
+                Get.closeDialog(),
+              },
             ),
           ),
           _tile(
@@ -125,7 +132,8 @@ class OverlaysView extends StatelessWidget {
             'Get.bottomSheet + 立即再弹一条',
             '两个浮层可以叠加，互不影响',
             () {
-              Get.bottomSheet(const _DemoBottomSheet());
+              Get.bottomSheet(const _DemoBottomSheet(),
+                  backgroundColor: Colors.white);
               Get.snackbar('提示', 'bottomSheet 已经打开了');
             },
           ),
@@ -170,7 +178,8 @@ class _DemoBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
+      child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
