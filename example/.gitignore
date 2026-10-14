@@ -30,8 +30,8 @@
 .pub-cache/
 .pub/
 /linux/
-/ios/
-/android/
+# android/ 与 ios/ 是要跟踪的示例工程；下面的平台本 fork 不提供，
+# web 尤其不能开——lib 里 platform.dart 无条件 import 'dart:io'，编译不过。
 /web/
 /macos/
 /windows/
