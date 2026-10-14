@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
 import '../../../../services/auth_service.dart';
+import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/login_controller.dart';
 
@@ -11,6 +12,10 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login'),
+        leading: const GetBackButton(),
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

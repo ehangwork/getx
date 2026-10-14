@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../controllers/product_details_controller.dart';
 
 class ProductDetailsView extends GetWidget<ProductDetailsController> {
@@ -9,6 +10,10 @@ class ProductDetailsView extends GetWidget<ProductDetailsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Product details'),
+        leading: const GetBackButton(),
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

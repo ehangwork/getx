@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
+import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 
@@ -21,6 +22,10 @@ class HomeView extends GetView<HomeController> {
             route: Routes.home,
             builder: (context) {
               return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Home'),
+                  leading: const GetBackButton(),
+                ),
                 body: GetRouterOutlet(
                   initialRoute: Routes.dashboard,
                   anchorRoute: Routes.home,

@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Snackbar / Dialog / BottomSheet 三类浮层的入口。
 /// 全部走 Get 的全局方法，不需要从当前页面的 context 里拿 Navigator。
@@ -42,7 +42,8 @@ class OverlaysView extends StatelessWidget {
                 borderRadius: 12,
               );
               // 静态入口：直接关掉当前正在显示的那条
-              Get.log('isSnackbarBeingShown = ${SnackbarController.isSnackbarBeingShown}');
+              Get.log(
+                  'isSnackbarBeingShown = ${SnackbarController.isSnackbarBeingShown}');
               Get.log('controller = $controller');
             },
           ),
@@ -108,9 +109,9 @@ class OverlaysView extends StatelessWidget {
               final picked = await Get.bottomSheet<int>(
                 const _DemoBottomSheet(),
                 isScrollControlled: true,
+                backgroundColor: Colors.white,
                 shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
               );
               Get.log('bottomSheet result: $picked');
