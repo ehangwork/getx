@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../get_core/get_core.dart';
 import '../../../get_instance/src/extension_instance.dart';
 import '../../../get_instance/src/lifecycle.dart';
+import '../simple/get_controllers.dart';
 import '../simple/list_notifier.dart';
 
 typedef GetXControllerBuilder<T extends GetLifeCycleMixin> = Widget Function(
@@ -84,7 +86,21 @@ class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
       controller?.onStart();
     }
 
+    _subscribeToController();
+
     super.initState();
+  }
+
+  Disposer? _removeListener;
+
+  /// GetX 的刷新来源有两个：builder 里读到的 Rx，以及 controller.update()。
+  /// 少了这一条，只读普通字段的 GetX<T> 就永远不会重建。
+  void _subscribeToController() {
+    final localController = controller;
+    if (localController is GetxController) {
+      _removeListener?.call();
+      _removeListener = localController.addListener(_update);
+    }
   }
 
   @override
@@ -104,6 +120,8 @@ class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
   @override
   void dispose() {
     if (widget.dispose != null) widget.dispose!(this);
+    _removeListener?.call();
+    _removeListener = null;
     if (_isCreator! || widget.assignId) {
       if (widget.autoRemove && Get.isRegistered<T>(tag: widget.tag)) {
         Get.delete<T>(tag: widget.tag);
@@ -122,16 +140,26 @@ class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
   }
 
   void _update() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (!mounted) return;
+    // 与 StatelessBuilder / Obx 保持同一条刷新路径：延到微任务，既避开
+    // build 期间的 setState，也让卸载后到达的通知不会打到 defunct element 上
+    scheduleMicrotask(() {
+      if (mounted) setState(() {});
+    });
   }
 
   final disposers = <Disposer>[];
 
   @override
   Widget build(BuildContext context) => Notifier.instance.append(
-      NotifyData(disposers: disposers, updater: _update),
+      NotifyData(
+        disposers: disposers,
+        updater: _update,
+        // GetX 的刷新本来就可以来自 controller.update()，不强制要求 builder 里
+        // 读到 Rx。「必须读到 Rx，否则抛 ObxError」是 Obx 的约定，
+        // 套到 GetX 上会让只读普通字段的 GetX<T> 直接报错。
+        throwException: false,
+      ),
       () => widget.builder(controller!));
 
   @override

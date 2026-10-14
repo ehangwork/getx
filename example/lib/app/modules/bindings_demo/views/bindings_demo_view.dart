@@ -23,9 +23,9 @@ class _BindingsDemoViewState extends State<BindingsDemoView> {
             '由路由的 binding 注册，三者的差别在创建时机与生命周期。',
             Column(
               children: [
-                _read(context, 'Bind.put', 'put'),
-                _read(context, 'Bind.lazyPut', 'lazyPut'),
-                _read(context, 'Bind.spawn', 'spawn'),
+                _read('Bind.put', Get.find<CounterService>(tag: 'put')),
+                _read('Bind.lazyPut', Get.find<CounterService>(tag: 'lazyPut')),
+                _read('Bind.spawn', Get.find<CounterService>(tag: 'spawn')),
               ],
             ),
           ),
@@ -39,7 +39,10 @@ class _BindingsDemoViewState extends State<BindingsDemoView> {
                 Bind.create<CounterService>((_) => CounterService('create')),
               ],
               child: Builder(
-                builder: (context) => _read(context, 'Bind.create', 'create'),
+                // Bind.create 的实例不在容器里，Get.find 找不到，
+                // 只能用 context.get 从这棵子树里取
+                builder: (context) =>
+                    _read('Bind.create', context.get<CounterService>()),
               ),
             ),
           ),
@@ -49,8 +52,8 @@ class _BindingsDemoViewState extends State<BindingsDemoView> {
             '同一个类可以注册多份，用 tag 区分。',
             Column(
               children: [
-                _read(context, 'left', 'left'),
-                _read(context, 'right', 'right'),
+                _read('left', Get.find<CounterService>(tag: 'left')),
+                _read('right', Get.find<CounterService>(tag: 'right')),
               ],
             ),
           ),
@@ -68,13 +71,13 @@ class _BindingsDemoViewState extends State<BindingsDemoView> {
     );
   }
 
-  Widget _read(BuildContext context, String label, String tag) {
+  Widget _read(String label, Object instance) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Expanded(child: Text(label)),
-          Text('${Get.find<CounterService>(tag: tag)}'),
+          Text('$instance'),
         ],
       ),
     );

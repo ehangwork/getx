@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+
 /// 容器实例的查询与销毁。isRegistered / delete 在按需创建的服务里
 /// 特别常用：先判断再取，或者取完立刻还回去。
 class InstanceController extends GetxController {
@@ -40,13 +41,23 @@ class InstanceController extends GetxController {
   }
 
   void deleteAll() {
-    Get.deleteAll(force: true);
-    _record('deleteAll(force: true)');
+    _nukeContainer('deleteAll(force: true)');
   }
 
   void reset() {
-    Get.reset();
-    _record('Get.reset()');
+    _nukeContainer('Get.reset()');
+  }
+
+  /// deleteAll / Get.reset 都是「把容器清空」的语义，会连本页的 controller
+  /// 一起带走。重新注册一个并把记录搬过去，页面才能继续演示，
+  /// 否则上面的 Obx 会因为找不到 InstanceController 直接抛错。
+  void _nukeContainer(String label) {
+    final log = List<String>.from(report);
+    Get.deleteAll(force: true);
+    Get.put(InstanceController());
+    final fresh = Get.find<InstanceController>();
+    fresh.report.addAll(log);
+    fresh._record('$label —— 连本页的 controller 一起清掉了，已重新注册');
   }
 
   void _record(String line) {
