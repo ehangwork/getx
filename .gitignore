@@ -24,10 +24,14 @@ doc/api/
 *.js.map
 
 # Files and directories created when test or run example
-example/android/local.properties
+# 任何层级的 Flutter 工程都会生成这个文件，内容是本机路径
+**/android/local.properties
 example/ios/
 example/.dart_tool/
 example/.packages
+
+# macOS
+.DS_Store
 
 # IntelliJ
 *.iml
