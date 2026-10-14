@@ -111,15 +111,27 @@ class GetRouterOutlet extends RouterOutlet<GetDelegate, RouteDecoder> {
             return ret;
           },
           key: key,
-          emptyPage: (delegate) =>
-              delegate.matchRoute(initialRoute).route ?? delegate.notFoundRoute,
+          emptyPage: (delegate) {
+            final config = delegate.currentConfiguration;
+            // outlet 已经不在当前分支上（切到别的子树了）时不能兜底重画默认页，
+            // 否则上一个分支的 outlet 会把刚刚切走的页面又画回来。
+            if (anchorRoute != null &&
+                (config == null ||
+                    !config.currentTreeBranch
+                        .pickFromRoute(anchorRoute)
+                        .isNotEmpty)) {
+              return null;
+            }
+            return _resolveInitialPage(delegate, anchorRoute, initialRoute) ??
+                delegate.notFoundRoute;
+          },
           navigatorKey: Get.nestedKey(anchorRoute)?.navigatorKey,
           delegate: delegate,
         );
   GetRouterOutlet.pickPages({
     super.key,
     Widget Function(GetDelegate delegate)? emptyWidget,
-    GetPage Function(GetDelegate delegate)? emptyPage,
+    GetPage? Function(GetDelegate delegate)? emptyPage,
     required super.pickPages,
     bool Function(Route<dynamic>, dynamic)? onPopPage,
     String? restorationScopeId,
@@ -167,6 +179,34 @@ class GetRouterOutlet extends RouterOutlet<GetDelegate, RouteDecoder> {
                   ? Get.nestedKey(route)
                   : Get.rootController.rootDelegate),
         );
+}
+
+/// `initialRoute` 是 outlet 内部的默认页，要按锚点拼成完整路径再匹配：
+/// 路由表里深层子路由注册的是完整路径（`/home/dashboard`），
+/// 直接拿 `initialRoute`（`/dashboard`）去全局匹配只会命中壳页 `/`，
+/// 于是壳页被嵌进自己，内外两个 outlet 抢同一个 navigatorKey 直接崩。
+///
+/// 先按锚点拼完整路径，再退回原始写法，兼容把完整路径传进来的老用法。
+GetPage? _resolveInitialPage(
+  GetDelegate delegate,
+  String? anchorRoute,
+  String initialRoute,
+) {
+  GetPage? match(String path) {
+    final page = delegate.matchRoute(path).route;
+    // matchRoute 找不到后半段时会返回「只匹配到前半段」的壳页，
+    // 这里必须校验名字等于请求路径，否则就把壳页当成了匹配结果。
+    return page != null && page.name == Uri.parse(path).path ? page : null;
+  }
+
+  if (anchorRoute != null) {
+    final anchored = match(
+      '${anchorRoute.replaceAll(RegExp(r'/+$'), '')}/'
+      '${initialRoute.replaceFirst(RegExp(r'^/+'), '')}',
+    );
+    if (anchored != null) return anchored;
+  }
+  return match(initialRoute);
 }
 
 class InheritedNavigator extends InheritedWidget {

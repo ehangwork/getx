@@ -27,9 +27,9 @@ class HomeView extends GetView<HomeController> {
                 ),
                 bottomNavigationBar: IndexedRouteBuilder(
                     routes: const [
-                      Routes.dashboard,
-                      Routes.profile,
-                      Routes.products
+                      Routes.homeDashboard,
+                      Routes.homeProfile,
+                      Routes.homeProducts
                     ],
                     builder: (context, routes, index) {
                       final delegate = context.delegate;

@@ -34,11 +34,17 @@ abstract class Routes {
   static const pagination = '/pagination';
   static const instance = '/instance';
 
-  /// 嵌套子路由的 name 只能是相对段，完整路径由父路由拼出来
+  /// 嵌套子路由的 name 只能是相对段，完整路径是父段直接拼接（`//home/products`）
   static const productDetails = '/:productId';
+
+  /// 深层子路由在路由表里注册的是完整路径，
+  /// outlet 的 initialRoute / IndexedRouteBuilder / Get.toNamed 都得用完整路径
+  static const homeDashboard = '$home$dashboard';
+  static const homeProfile = '$home$profile';
+  static const homeProducts = '$home$products';
 
   static String LOGIN_THEN(String afterSuccessfulLogin) =>
       '$login?then=${Uri.encodeQueryComponent(afterSuccessfulLogin)}';
 
-  static String PRODUCT_DETAILS(String productId) => '$products/$productId';
+  static String PRODUCT_DETAILS(String productId) => '$homeProducts/$productId';
 }
