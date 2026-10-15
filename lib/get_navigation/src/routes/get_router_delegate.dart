@@ -301,12 +301,27 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
       return _activePages.map((e) => e.route!);
     }
 
-    // 用户显式声明过 participatesInRootNavigator，根 navigator 只收声明为 true 的页。
+    // 用户显式声明过 participatesInRootNavigator，根 navigator 只收两类页：
+    // 1. 声明为 true 的页（扁平模块页、Get.to/off/offAll 合成的匿名页）；
+    // 2. 整条 branch 都没有任何 pinRN 声明的顶层页 —— 即纯扁平用法的历史页。
+    //    它没有能落进去的 outlet，剔除就等于凭空消失。纯扁平 app 本来走不到
+    //    这条路径，但匿名页声明了 true，会把扁平 app 也带进来；漏掉这类页会把
+    //    前一页从根 navigator 挤掉（页面被 dispose、状态与 controller 全丢）。
+    //    注意判定是「没有声明」而不是「没声明 true」：声明为 false 的壳页
+    //    （自相矛盾配置）仍要维持「不进根 navigator」的既有行为。
+    //
     // 这里必须遍历整条历史而不是只取 currentTreeBranch：
     // branch 只是「从根到当前页」的那条链，中间压过的页不在里面，
     // 只看 branch 会把历史丢掉，栈塌成当前这一页（压第二层时第一层直接消失）。
-    final pages =
-        _activePages.map((e) => e.route!).where((p) => p.participatesInRootNavigator == true);
+    final pages = _activePages
+        .where(
+          (e) =>
+              e.route!.participatesInRootNavigator == true ||
+              !e.currentTreeBranch.any(
+                (page) => page.participatesInRootNavigator != null,
+              ),
+        )
+        .map((e) => e.route!);
 
     if (pages.isNotEmpty) return pages;
 

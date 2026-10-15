@@ -1,20 +1,25 @@
-import 'dart:io';
+import 'platform_stub.dart'
+    if (dart.library.js_interop) 'platform_web.dart'
+    if (dart.library.io) 'platform_io.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class GetPlatform {
-  static bool get isMacOS => Platform.isMacOS;
+  static bool get isWeb => GeneralPlatform.isWeb;
 
-  static bool get isWindows => Platform.isWindows;
+  static bool get isMacOS => GeneralPlatform.isMacOS;
 
-  static bool get isLinux => Platform.isLinux;
+  static bool get isWindows => GeneralPlatform.isWindows;
 
-  static bool get isAndroid => Platform.isAndroid;
+  static bool get isLinux => GeneralPlatform.isLinux;
 
-  static bool get isIOS => Platform.isIOS;
+  static bool get isAndroid => GeneralPlatform.isAndroid;
 
-  static bool get isFuchsia => Platform.isFuchsia;
+  static bool get isIOS => GeneralPlatform.isIOS;
 
-  static bool get isMobile => isIOS || isAndroid;
+  static bool get isFuchsia => GeneralPlatform.isFuchsia;
 
-  static bool get isDesktop => isMacOS || isWindows || isLinux;
+  static bool get isMobile => GetPlatform.isIOS || GetPlatform.isAndroid;
+
+  static bool get isDesktop =>
+      GetPlatform.isMacOS || GetPlatform.isWindows || GetPlatform.isLinux;
 }

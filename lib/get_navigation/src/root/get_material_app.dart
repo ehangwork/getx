@@ -246,9 +246,16 @@ class GetMaterialApp extends StatelessWidget {
                 (rtlLanguages.contains(Get.locale?.languageCode)
                     ? TextDirection.rtl
                     : TextDirection.ltr),
-            child: builder == null
-                ? (child ?? const Material())
-                : builder!(context, child ?? const Material()),
+            // 转场中间帧会露出 Router 底下的区域（WithFade 系两页同时离屏、
+            // zoom 系双页同时半透明），不垫背景露出来的是未绘制表面（黑底黑边）。
+            // builder 的 context 在 AnimatedTheme 之下，Theme.of 拿到的是
+            // themeMode 解析后的生效主题，明暗模式都正确。
+            child: ColoredBox(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: builder == null
+                  ? (child ?? const Material())
+                  : builder!(context, child ?? const Material()),
+            ),
           ),
           title: title,
           onGenerateTitle: onGenerateTitle,

@@ -35,6 +35,15 @@
 - `GetPage.copyWith` 的类型不安全（混用带泛型/不带泛型的跳转会 `_TypeError`）。
 - `GetPage.copyWith` 不再丢掉 `restorationId`。
 - 嵌套路由下 `Get.offAllNamed` 到叶子页不再白屏。
+- 纯扁平路由（全程未声明 `participatesInRootNavigator`）下 `Get.to` / `Get.off` /
+  `Get.offAll` 的匿名页不再把前一页从根 navigator 挤掉 —— 之前前一页会被 dispose，
+  状态与 controller 全丢，`Get.back()` 回去是重建的新页面。
+- web 平台恢复可用：`GetPlatform` 恢复条件导入（io / web / stub）与 `GetPlatform.isWeb`。
+  之前 `platform.dart` 无条件 `import 'dart:io'`，web 上构建路由时读取
+  `GetPlatform.isIOS` 等会直接抛 `Unsupported operation: Platform._operatingSystem`。
+- 路由转场中间帧的露底区不再显示为黑色：`GetMaterialApp` 在 Router 底下垫了
+  `scaffoldBackgroundColor` 背景层。WithFade 系过渡两页同时离屏、zoom 系两页
+  同时半透明时，露出的区域现在是主题背景色（明暗模式均跟随生效主题）。
 
 ## [5.0.0-release-candidate-9.3.3]
 
