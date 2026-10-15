@@ -292,21 +292,29 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
   ///
   /// visual pages must have [GetPage.participatesInRootNavigator] set to true
   Iterable<GetPage> getVisualPages(RouteDecoder? currentHistory) {
-    final res = currentHistory!.currentTreeBranch.where(
+    final branch = currentHistory!.currentTreeBranch;
+    final res = branch.where(
       (r) => r.participatesInRootNavigator != null,
     );
     if (res.isEmpty) {
       //default behavior, all routes participate in root navigator
       return _activePages.map((e) => e.route!);
-    } else {
-      // 用户显式声明过 participatesInRootNavigator，根 navigator 只收声明为 true 的页。
-      // 这里必须遍历整条历史而不是只取 currentTreeBranch：
-      // branch 只是「从根到当前页」的那条链，中间压过的页不在里面，
-      // 只看 branch 会把历史丢掉，栈塌成当前这一页（压第二层时第一层直接消失）。
-      return _activePages
-          .map((e) => e.route!)
-          .where((element) => element.participatesInRootNavigator == true);
     }
+
+    // 用户显式声明过 participatesInRootNavigator，根 navigator 只收声明为 true 的页。
+    // 这里必须遍历整条历史而不是只取 currentTreeBranch：
+    // branch 只是「从根到当前页」的那条链，中间压过的页不在里面，
+    // 只看 branch 会把历史丢掉，栈塌成当前这一页（压第二层时第一层直接消失）。
+    final pages =
+        _activePages.map((e) => e.route!).where((p) => p.participatesInRootNavigator == true);
+
+    if (pages.isNotEmpty) return pages;
+
+    // 历史项的末页里一个 pinRN 页都没有时，只能退化到分支内的祖先。
+    // 典型场景：历史被压成一条（Get.offAllNamed 到嵌套叶子页），
+    // 末页不是 pinRN 页，而嵌套壳 `/` 作为分支祖先必须留在根 navigator，
+    // 否则算出来是空列表 → build 退化成 ColoredBox 白屏。
+    return branch.where((p) => p.participatesInRootNavigator == true);
   }
 
   @override
