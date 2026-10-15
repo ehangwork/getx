@@ -174,10 +174,42 @@ class PageRedirect {
     this.settings,
   });
 
+  /// 单次建路由时最多允许多少轮 redirect 收敛。
+  ///
+  /// 收敛不了的情况有两种：middleware 每次都返回同一个目标；
+  /// 或者像上游 #3139 那样，redirect 新增的路径参数读不回来，
+  /// 中间件认为参数还是缺，又生成一个新值再 redirect。
+  /// 这段循环跑在 build 期，没有上限就会同步死循环、把整个界面冻住。
+  static const int maxRedirectRounds = 20;
+
   // redirect all pages that needes redirecting
   GetPageRoute<T> getPageToRoute<T>(
       GetPage rou, GetPage? unk, BuildContext context) {
-    while (needRecheck(context)) {}
+    RouteSettings? previous;
+    var settled = false;
+    for (var round = 0; round < maxRedirectRounds; round++) {
+      if (!needRecheck(context)) {
+        settled = true;
+        break;
+      }
+
+      // 目标和上一轮完全一样说明这轮没有进展，再转下去也只是重复同一个结果。
+      if (settings?.name == previous?.name &&
+          settings?.arguments == previous?.arguments) {
+        settled = true;
+        break;
+      }
+      previous = settings;
+    }
+
+    if (!settled) {
+      Get.log(
+        'Redirect did not settle within $maxRedirectRounds rounds, '
+        'stopped at "${settings?.name}".',
+        isError: true,
+      );
+    }
+
     final r = (isUnknown ? unk : rou)!;
 
     return GetPageRoute<T>(
