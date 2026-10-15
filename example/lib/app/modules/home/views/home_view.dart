@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../shared/widgets/get_back_button.dart';
 import '../../../routes/app_pages.dart';
@@ -12,11 +12,6 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          color: Colors.yellow,
-          width: double.infinity,
-          height: 25,
-        ),
         Expanded(
           child: GetRouterOutlet.builder(
             route: Routes.home,
