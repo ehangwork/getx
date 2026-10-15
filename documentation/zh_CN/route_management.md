@@ -7,6 +7,10 @@
     - [中间件](#中间件)
   - [免context导航](#免context导航)
   - [嵌套导航](#嵌套导航)
+    - [participatesInRootNavigator 约定](#participatesinrootnavigator-约定)
+    - [outlet 里的页没有自动返回键](#outlet-里的页没有自动返回键)
+    - [从 outlet 页跳出去的顶层页不进 outlet](#从-outlet-页跳出去的顶层页不进-outlet)
+    - [旧的 nestedKey 写法](#旧的-nestedkey-写法)
 
 # 路由管理
 
@@ -371,49 +375,60 @@ class Third extends StatelessWidget {
 
 ## 嵌套导航
 
-Get让Flutter的嵌套导航更加简单。
-你不需要context，而是通过Id找到你的导航栈。
-
-- 注意：创建平行导航堆栈可能是危险的。理想的情况是不要使用NestedNavigators，或者尽量少用。如果你的项目需要它，请继续，但请记住，在内存中保持多个导航堆栈可能不是一个好主意(消耗RAM)。
-
-看看它有多简单:
+Get 用声明式路由表表达嵌套：壳页通过 `children:` 挂子路由，壳的 `page` 里放一个 `GetRouterOutlet` 来承载子路由的 Navigator。
 
 ```dart
-Navigator(
-  key: Get.nestedKey(1), // create a key by index
+GetMaterialApp(
   initialRoute: '/',
-  onGenerateRoute: (settings) {
-    if (settings.name == '/') {
-      return GetPageRoute(
-        page: () => Scaffold(
-          appBar: AppBar(
-            title: Text("Main"),
-          ),
-          body: Center(
-            child: TextButton(
-              color: Colors.blue,
-              onPressed: () {
-                Get.toNamed('/second', id:1); // navigate by your nested route by index
-              },
-              child: Text("Go to second"),
-            ),
-          ),
-        ),
-      );
-    } else if (settings.name == '/second') {
-      return GetPageRoute(
-        page: () => Center(
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text("Main"),
-            ),
-            body: Center(
-              child:  Text("second")
-            ),
-          ),
-        ),
-      );
-    }
-  }
-),
+  getPages: [
+    GetPage(
+      name: '/',
+      participatesInRootNavigator: true, // 壳页必须为 true，见下方约定
+      page: () => Scaffold(
+        appBar: AppBar(title: const Text('Shell')),
+        body: GetRouterOutlet(initialRoute: '/menu', anchorRoute: '/'),
+      ),
+      children: [
+        GetPage(name: '/menu', page: () => const MenuPage()),
+        GetPage(name: '/detail', page: () => const DetailPage()),
+      ],
+    ),
+  ],
+);
 ```
+
+在壳里跳子路由直接 `Get.toNamed('/detail')`，不需要带 id。
+
+### participatesInRootNavigator 约定
+
+这条约定必须遵守。声明式路由下，每个 `GetPage` 要么由**根 Navigator** 渲染，要么由它上方某个 `GetRouterOutlet` 渲染，二选一。`participatesInRootNavigator` 就是这个开关：
+
+- **壳页（带 `children` 的那一层）写 `participatesInRootNavigator: true`**。壳要留在根 Navigator，子路由才有地方挂。
+- **叶子页不要写，或写 `false`**。叶子由 outlet 渲染。
+
+这个字段没有可依赖的默认值：全表都不写时结果取决于当前分支，而 `Get.to` / `Get.off` / `Get.offAll` 合成的匿名页一律按 `true` 处理。建议把壳页的 `true` 显式写出来。
+
+壳页写成 `false`（或写 `false` 又想要壳渲染 outlet）是自相矛盾的配置 —— 意思是「壳不进根 Navigator」，而根 Navigator 没有任何页可渲染。症状是从壳跳到叶子页后整页空白。这里不做兜底：把壳塞回根 Navigator 会和它自己渲染的 outlet 抢同一个 GlobalKey 直接崩溃，比留空更糟。
+
+### outlet 里的页没有自动返回键
+
+outlet 自己就是一个只持有一页的 Navigator，`Navigator.canPop` 恒为 false，所以 outlet 里的页用 `AppBar` 时**不会**出现自动返回键。要自己加：
+
+```dart
+AppBar(
+  leading: Get.rootController.rootDelegate.canBack
+      ? BackButton(onPressed: Get.back)
+      : null,
+  title: const Text('Detail'),
+);
+```
+
+`Get.canBack()` 在 5.0 里不存在，请用 `Get.rootController.rootDelegate.canBack`。
+
+### 从 outlet 页跳出去的顶层页不进 outlet
+
+`Get.to` / `Get.off` / `Get.offAll` 合成的是匿名顶层页，一律待在根 Navigator —— 否则会落进 outlet 被当前页盖住，看起来像「跳了但没反应」。所以从壳里跳出去的页既能走正常的返回动画，也能被 `Get.back()` 正常弹回。
+
+### 旧的 nestedKey 写法
+
+`Get.nestedKey` 现在接收的是**路由路径字符串**（`Get.nestedKey('/home')`），不再是 4.x 的数字 id；配合 `Navigator(onGenerateRoute:)` 的并行导航栈写法也不再适用，改用上面的声明式 `children:` + `GetRouterOutlet`。

@@ -7,6 +7,10 @@
     - [Middleware](#middleware)
   - [Navigation without context](#navigation-without-context)
   - [Nested Navigation](#nested-navigation)
+    - [The participatesInRootNavigator contract](#the-participatesinrootnavigator-contract)
+    - [Pages inside an outlet get no automatic back button](#pages-inside-an-outlet-get-no-automatic-back-button)
+    - [Top-level pages pushed from an outlet stay out of it](#top-level-pages-pushed-from-an-outlet-stay-out-of-it)
+    - [The old nestedKey style no longer applies](#the-old-nestedkey-style-no-longer-applies)
 
 # Route Management
 
@@ -381,49 +385,60 @@ These two contexts will work in 99% of cases to replace the context of your UI, 
 
 ## Nested Navigation
 
-Get made Flutter's nested navigation even easier.
-You don't need the context, and you will find your navigation stack by Id.
-
-- NOTE: Creating parallel navigation stacks can be dangerous. The ideal is not to use NestedNavigators, or to use sparingly. If your project requires it, go ahead, but keep in mind that keeping multiple navigation stacks in memory may not be a good idea for RAM consumption.
-
-See how simple it is:
+Get expresses nesting through the declarative route table: a shell page hangs its children off `children:`, and the shell's `page` holds a `GetRouterOutlet` that carries the nested Navigator.
 
 ```dart
-Navigator(
-  key: Get.nestedKey(1), // create a key by index
+GetMaterialApp(
   initialRoute: '/',
-  onGenerateRoute: (settings) {
-    if (settings.name == '/') {
-      return GetPageRoute(
-        page: () => Scaffold(
-          appBar: AppBar(
-            title: Text("Main"),
-          ),
-          body: Center(
-            child: TextButton(
-              color: Colors.blue,
-              onPressed: () {
-                Get.toNamed('/second', id:1); // navigate by your nested route by index
-              },
-              child: Text("Go to second"),
-            ),
-          ),
-        ),
-      );
-    } else if (settings.name == '/second') {
-      return GetPageRoute(
-        page: () => Center(
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text("Main"),
-            ),
-            body: Center(
-              child:  Text("second")
-            ),
-          ),
-        ),
-      );
-    }
-  }
-),
+  getPages: [
+    GetPage(
+      name: '/',
+      participatesInRootNavigator: true, // shells must be true, see below
+      page: () => Scaffold(
+        appBar: AppBar(title: const Text('Shell')),
+        body: GetRouterOutlet(initialRoute: '/menu', anchorRoute: '/'),
+      ),
+      children: [
+        GetPage(name: '/menu', page: () => const MenuPage()),
+        GetPage(name: '/detail', page: () => const DetailPage()),
+      ],
+    ),
+  ],
+);
 ```
+
+To reach a child route from the shell, just use `Get.toNamed('/detail')` — no id needed.
+
+### The participatesInRootNavigator contract
+
+This contract must be followed. Under declarative routing every `GetPage` is rendered by **either** the root Navigator **or** a `GetRouterOutlet` above it, never both. `participatesInRootNavigator` is that switch:
+
+- **Shell pages (the ones carrying `children`) set `participatesInRootNavigator: true`.** The shell has to stay in the root Navigator so nested routes have somewhere to attach.
+- **Leaf pages omit it, or set `false`.** Leaves are rendered by the outlet.
+
+The field has no dependable default: when nothing in the table declares it, the result depends on the current branch, and the anonymous pages synthesized by `Get.to` / `Get.off` / `Get.offAll` are always treated as `true`. Write the shell's `true` explicitly.
+
+Setting `false` on a shell (or asking a shell to stay out of the root Navigator while still rendering an outlet) is self-contradictory — it means "the shell is not in the root Navigator" while the root Navigator has no page at all to render. The symptom is a blank screen after navigating from the shell to a leaf. There is deliberately no fallback here: putting the shell back in the root Navigator makes it fight the outlet it renders for the same GlobalKey and crash, which is worse than an empty screen.
+
+### Pages inside an outlet get no automatic back button
+
+An outlet is itself a single-page Navigator, so `Navigator.canPop` is always false there and an `AppBar` inside it **never** shows an automatic back button. Add your own:
+
+```dart
+AppBar(
+  leading: Get.rootController.rootDelegate.canBack
+      ? BackButton(onPressed: Get.back)
+      : null,
+  title: const Text('Detail'),
+);
+```
+
+`Get.canBack()` does not exist in 5.0; use `Get.rootController.rootDelegate.canBack`.
+
+### Top-level pages pushed from an outlet stay out of it
+
+`Get.to` / `Get.off` / `Get.offAll` synthesize an anonymous top-level page, and those always stay in the root Navigator — otherwise they would land inside the outlet, be covered by the current page, and look like "it navigated but nothing happened". A page pushed out of the shell this way therefore gets the normal back transition and is popped by `Get.back()` as expected.
+
+### The old nestedKey style no longer applies
+
+`Get.nestedKey` now takes a **route path string** (`Get.nestedKey('/home')`), not a 4.x numeric id, and the parallel-stack style built on `Navigator(onGenerateRoute:)` is no longer the supported approach. Use the declarative `children:` + `GetRouterOutlet` shown above.

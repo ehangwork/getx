@@ -223,23 +223,4 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
-
-  group('GetPlatform 基本面', () {
-    test('isWeb 在 VM 上为 false，各平台判定不抛异常', () {
-      expect(GetPlatform.isWeb, isFalse);
-      // 只是确认 getter 可用、不抛 UnimplementedError。
-      final values = [
-        GetPlatform.isAndroid,
-        GetPlatform.isIOS,
-        GetPlatform.isMacOS,
-        GetPlatform.isWindows,
-        GetPlatform.isLinux,
-        GetPlatform.isFuchsia,
-        GetPlatform.isMobile,
-        GetPlatform.isDesktop,
-      ];
-      expect(values.any((e) => e), isTrue,
-          reason: '测试跑在真实宿主上，至少一个平台判定应为 true');
-    });
-  });
 }

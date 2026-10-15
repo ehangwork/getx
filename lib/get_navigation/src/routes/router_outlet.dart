@@ -98,13 +98,16 @@ class GetRouterOutlet extends RouterOutlet<GetDelegate, RouteDecoder> {
             if (anchorRoute == null) {
               // jump the ancestor path
               final length = Uri.parse(initialRoute).pathSegments.length;
-
-              return config.currentTreeBranch
-                  .skip(length)
-                  .take(length)
-                  .toList();
+              ret = config.currentTreeBranch.skip(length).take(length);
+            } else {
+              ret = config.currentTreeBranch.pickAfterRoute(anchorRoute);
             }
-            ret = config.currentTreeBranch.pickAfterRoute(anchorRoute);
+            // outlet 只渲染「住在 outlet 里」的页。声明了
+            // participatesInRootNavigator: true 的页由根 navigator 负责渲染
+            // （扁平模块页，以及 Get.to/off/offAll 合成的匿名页），它们同时
+            // 也留在当前分支上 —— 不滤掉的话，同一个 GetPage 会被两个
+            // Navigator 各建一份：页面上多出一层重复内容，controller 也注册两套。
+            ret = ret.where((p) => p.participatesInRootNavigator != true);
             if (filterPages != null) {
               ret = filterPages(ret);
             }

@@ -38,9 +38,20 @@
 - 纯扁平路由（全程未声明 `participatesInRootNavigator`）下 `Get.to` / `Get.off` /
   `Get.offAll` 的匿名页不再把前一页从根 navigator 挤掉 —— 之前前一页会被 dispose，
   状态与 controller 全丢，`Get.back()` 回去是重建的新页面。
-- web 平台恢复可用：`GetPlatform` 恢复条件导入（io / web / stub）与 `GetPlatform.isWeb`。
-  之前 `platform.dart` 无条件 `import 'dart:io'`，web 上构建路由时读取
-  `GetPlatform.isIOS` 等会直接抛 `Unsupported operation: Platform._operatingSystem`。
+- `GetRouterOutlet` 不再渲染声明 `participatesInRootNavigator: true` 的页。
+  outlet 按 `pickAfterRoute` 从当前分支取页，而 `Get.to` / `Get.off` / `Get.offAll`
+  合成的匿名顶层页同样留在分支上 —— 同一个 `GetPage` 会被根 navigator 与 outlet
+  各建一份，页面上多出一层重复内容，controller 也注册了两套。
+  从 outlet 页跳到顶层页后，目标页只应出现一份。
+- `GetPlatform` 恢复 web 支持：条件导入（io / web / stub）回来了，`GetPlatform.isWeb`
+  重新可用。此前 `platform.dart` 无条件 `import 'dart:io'`，在 web 上读取
+  `GetPlatform.isIOS` 会在运行期抛 `Unsupported operation: Platform._operatingSystem`
+  （dart2js 自带 dart:io 桩，属运行期失败而非编译期报错）。
+  这推翻了上一版精简里「删掉 Web 抽象、让 Web 代码编译期就失败」的决定 ——
+  实测那个前提并不成立：编译是能过的，只在第一次导航时才炸，响亮失败没实现，
+  反而变成延迟踩雷；而且 README 当时仍在文档 `GetPlatform.isWeb`，代码与文档已对不上。
+  注意仓库仍不含 `web/` runner 目录、pubspec 也没有 `flutter_web_plugins`，
+  要跑 web 仍需自行 `flutter create --platforms=web .`。
 - 路由转场中间帧的露底区不再显示为黑色：`GetMaterialApp` 在 Router 底下垫了
   `scaffoldBackgroundColor` 背景层。WithFade 系过渡两页同时离屏、zoom 系两页
   同时半透明时，露出的区域现在是主题背景色（明暗模式均跟随生效主题）。
