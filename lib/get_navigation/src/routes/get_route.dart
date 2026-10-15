@@ -100,6 +100,13 @@ class GetPage<T> extends Page<T> {
         );
   // settings = RouteSettings(name: name, arguments: Get.arguments);
 
+  /// 不接收方法级类型参数：copyWith 必须原样保留接收者的 T。
+  ///
+  /// 之前这里自己带了一个 `<T>`，于是会把 `this`（`GetPage<X>`）上的
+  /// `completer` / `children` / `onPopInvoked` 拷进另一个类型的实例 ——
+  /// 调用方只要显式指定另一个类型（`Get.toNamed<String>(...)` 之后接
+  /// `Get.offAll<String>(...)`），就会把 `Completer<dynamic>` 塞进
+  /// `Completer<String?>` 的字段，运行时抛 _TypeError。
   GetPage<T> copyWith({
     LocalKey? key,
     String? name,
@@ -120,7 +127,7 @@ class GetPage<T> extends Page<T> {
     Duration? reverseTransitionDuration,
     bool? fullscreenDialog,
     RouteSettings? settings,
-    List<GetPage<T>>? children,
+    List<GetPage>? children,
     GetPage? unknownRoute,
     List<GetMiddleware>? middlewares,
     bool? preventDuplicates,
@@ -134,7 +141,10 @@ class GetPage<T> extends Page<T> {
     PopInvokedWithResultCallback<T>? onPopInvoked,
     String? restorationId,
   }) {
-    return GetPage(
+    // 这里必须显式写 GetPage<T>：不写的话构造器的类型参数会从实参反推
+    // （传入 Completer<String?> 就会被推成 GetPage<String>），
+    // 于是 copyWith 的"返回类型和接收者一致"只是编译期成立，运行时实例却是别的类型。
+    return GetPage<T>(
       key: key ?? this.key,
       participatesInRootNavigator:
           participatesInRootNavigator ?? this.participatesInRootNavigator,
@@ -168,7 +178,7 @@ class GetPage<T> extends Page<T> {
       inheritParentPath: inheritParentPath ?? this.inheritParentPath,
       canPop: canPop ?? this.canPop,
       onPopInvoked: onPopInvoked ?? this.onPopInvoked,
-      restorationId: restorationId ?? restorationId,
+      restorationId: restorationId ?? this.restorationId,
     );
   }
 

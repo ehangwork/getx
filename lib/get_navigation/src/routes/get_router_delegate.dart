@@ -665,7 +665,7 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
     final index = _activePages.length > 1 ? _activePages.length - 1 : 0;
     _routeTree.addRoute(page);
 
-    final activePage = _getRouteDecoder(arguments);
+    final activePage = _getRouteDecoder<T>(arguments);
 
     // final activePage = _configureRouterDecoder<T>(route!, arguments);
 
