@@ -4,11 +4,14 @@ import 'package:get/get.dart';
 
 /// iOS 侧滑返回的触发区域。
 ///
+/// 默认触发带 44pt（Apple HIG 最小可点击区域），不是 Flutter 原生的 20 ——
+/// 20 忠实于原生但不够灵敏，落点差十几像素就静默失败。
+///
 /// `GetPageRouteTransitionMixin.buildPageTransitions` 的 `limitedSwipe` 默认 false，
 /// 手势检测器就用 `Positioned.fill` 铺满整页 —— 页面上任何位置横向拖动都会触发
 /// 返回，横滑 ListView / 轮播 / 滑块也会被抢走手势，比 iOS 原生灵敏得多。
 ///
-/// 原生只在屏幕起始边缘约 20px 内响应（刘海屏按安全区加宽），
+/// 只在屏幕起始边缘的一条带内响应（默认 44pt，刘海屏按安全区加宽），
 /// 宽度可通过 GetPage 的 `gestureWidth` 逐页调整。
 
 class HomeBody extends StatelessWidget {
@@ -79,8 +82,49 @@ void main() {
 
     final pos = tester.widget<PositionedDirectional>(strip);
     expect(pos.start, 0, reason: '应贴在起始边');
-    expect(pos.width, 20,
-        reason: '测试视口无刘海，宽度就是 _kBackGestureWidth；GetPage.gestureWidth 可逐页调');
+    expect(pos.width, 44,
+        reason: '默认取 HIG 最小可点击区域 44pt；GetPage.gestureWidth 可逐页调');
+  });
+
+  testWidgets('触发带加宽到 44 后仍不能挡住 AppBar 返回键的点击', (tester) async {
+    // 触发带与返回键在屏幕上重叠（返回键大致横跨 x=8~56），靠的是
+    // HitTestBehavior.translucent —— 底层 widget 照样能收到点击。
+    var tapped = false;
+    await tester.pumpWidget(GetMaterialApp(
+      popGesture: true,
+      initialRoute: '/home',
+      getPages: [
+        GetPage(name: '/home', page: () => const HomeBody()),
+        GetPage(
+          name: '/second',
+          page: () => Scaffold(
+            appBar: AppBar(
+              leading: Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    tapped = true;
+                    Get.back();
+                  },
+                ),
+              ),
+            ),
+            body: const Center(child: Text('second-body')),
+          ),
+        ),
+      ],
+    ));
+    await _settle(tester);
+    Get.toNamed('/second');
+    await _settle(tester);
+
+    // 返回键中心大约落在 x=24，稳稳位于 44pt 触发带内
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await _settle(tester);
+
+    expect(tapped, isTrue, reason: '触发带不该吞掉返回键的点击');
+    expect(find.text('home-body'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('从页面中间起手横向拖动不应触发返回', (tester) async {
@@ -127,6 +171,6 @@ void main() {
     );
     // PositionedDirectional 的 start=0 在 RTL 下就是从右往左量的 0，即右边缘。
     expect(pos.start, 0);
-    expect(pos.width, 20);
+    expect(pos.width, 44);
   });
 }

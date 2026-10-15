@@ -114,18 +114,23 @@ Get.to(HomePage());
 ### The trigger area of the iOS swipe-back gesture
 
 On iOS the swipe-back gesture is on by default and its trigger area is **only a
-narrow strip along the leading edge** of the screen (about 20px, widened by the
-safe area on notched devices), matching native behaviour — dragging anywhere
-else on the page does not trigger it, so horizontal ListViews, carousels and
-sliders keep their own gestures.
+strip along the leading edge** of the screen (44pt by default, widened by the
+safe area on notched devices) — dragging anywhere else on the page does not
+trigger it, so horizontal ListViews, carousels and sliders keep their gestures.
 
-To widen the strip, adjust it per page:
+The default is 44pt, Apple's HIG minimum touch target, rather than Flutter's
+native 20: a fingertip is a contact patch roughly 40pt across, so a 20pt strip
+is only half a fingertip, and a one-handed thumb arc that lands ten pixels off
+does nothing at all — with no feedback, users just assume the feature is
+broken. 44pt is about 11% of a 393pt-wide phone, still clearly an edge gesture.
+
+To adjust it per page:
 
 ```dart
 GetPage(
   name: '/detail',
   page: () => const DetailPage(),
-  gestureWidth: (context) => 40, // strip width, defaults to 20
+  gestureWidth: (context) => 60, // strip width, defaults to 44
 );
 ```
 

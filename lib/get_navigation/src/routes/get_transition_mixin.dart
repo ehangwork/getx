@@ -15,7 +15,26 @@ import 'default_transitions.dart';
 import 'transitions_type.dart';
 import '../root/get_root.dart';
 
-const double _kBackGestureWidth = 20.0;
+/// 侧滑返回的触发带宽度。
+///
+/// Flutter 原生 `CupertinoRouteTransitionMixin` 用 20，iOS 原生的
+/// `UIScreenEdgePanGestureRecognizer` 更窄 —— 忠实照搬的结果是「不够灵敏」：
+/// 手指落点不是数学意义上的点，而是一块约 40+pt 宽的接触面，20pt 只有半个指腹，
+/// 单手握持时拇指自然弧线扫过左边缘，落点差十几像素就完全没反应，且没有任何反馈。
+/// 落空是静默失败，用户只会以为功能坏了。
+///
+/// 44 取自 Apple HIG 的最小可点击区域（44×44pt）—— 唯一一个由平台自己定义的
+/// 「能被指腹可靠命中」的尺寸，用作起手区有明确依据。
+/// 在 393pt 宽的手机上约占 11%，仍然是明确的边缘手势，离「整页可滑」很远：
+/// Apple 直到 iOS 26 才新增整页返回手势，理由也是屏幕变大后边缘太难点。
+///
+/// 往宽了走的代价是不对称的，所以停在这里：
+/// - 太窄 → 静默无反应，用户放弃（代价低，但体验差）
+/// - 太宽 → 误触发返回，用户输入丢失，还抢走贴边的横向 ListView / 轮播 / 滑块手势
+///   （代价高得多）
+///
+/// 需要按页微调用 `GetPage.gestureWidth`，需要整页可滑请自行传 `limitedSwipe: false`。
+const double _kBackGestureWidth = 44.0;
 
 const double _kMinFlingVelocity = 1; // Screen widths per second.
 
