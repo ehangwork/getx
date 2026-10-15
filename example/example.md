@@ -347,12 +347,6 @@ class First extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            Get.snackbar("Hi", "I'm modern snackbar");
-          },
-        ),
         title: Text("title".trArgs(['John'])),
       ),
       body: Center(
@@ -429,13 +423,9 @@ class Second extends GetView<ControllerX> {
               },
             ),
             ElevatedButton(
-              child: Text("Back page and open snackbar"),
+              child: Text("Back page"),
               onPressed: () {
                 Get.back();
-                Get.snackbar(
-                  'User 123',
-                  'Successfully created',
-                );
               },
             ),
             ElevatedButton(

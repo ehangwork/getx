@@ -41,7 +41,6 @@ void main() {
       Routes.navigation,
       Routes.transitions,
       Routes.bindings,
-      Routes.overlays,
       Routes.instance,
       Routes.lifecycle,
       Routes.home,

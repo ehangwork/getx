@@ -15,7 +15,6 @@ import '../../../get_utils/src/extensions/internationalization.dart';
 import '../extension_navigation.dart';
 import '../router_report.dart';
 import '../routes/index.dart';
-import '../snackbar/snackbar_controller.dart';
 
 class ConfigData {
   final ValueChanged<Routing?>? routingCallback;
@@ -52,11 +51,8 @@ class ConfigData {
   final bool defaultOpaqueRoute;
   final Duration defaultTransitionDuration;
   final Curve defaultTransitionCurve;
-  final Curve defaultDialogTransitionCurve;
-  final Duration defaultDialogTransitionDuration;
   final Routing routing;
   final Map<String, String?> parameters;
-  final SnackBarQueue snackBarQueue = SnackBarQueue();
 
   ConfigData({
     required this.routingCallback,
@@ -92,8 +88,6 @@ class ConfigData {
     this.defaultOpaqueRoute = true,
     this.defaultTransitionDuration = const Duration(milliseconds: 300),
     this.defaultTransitionCurve = Curves.easeOutQuad,
-    this.defaultDialogTransitionCurve = Curves.easeOutQuad,
-    this.defaultDialogTransitionDuration = const Duration(milliseconds: 300),
     this.parameters = const {},
     required this.defaultPopGesture,
     Routing? routing,
@@ -134,8 +128,6 @@ class ConfigData {
     bool? defaultOpaqueRoute,
     Duration? defaultTransitionDuration,
     Curve? defaultTransitionCurve,
-    Curve? defaultDialogTransitionCurve,
-    Duration? defaultDialogTransitionDuration,
     Routing? routing,
     Map<String, String?>? parameters,
   }) {
@@ -178,10 +170,6 @@ class ConfigData {
           defaultTransitionDuration ?? this.defaultTransitionDuration,
       defaultTransitionCurve:
           defaultTransitionCurve ?? this.defaultTransitionCurve,
-      defaultDialogTransitionCurve:
-          defaultDialogTransitionCurve ?? this.defaultDialogTransitionCurve,
-      defaultDialogTransitionDuration: defaultDialogTransitionDuration ??
-          this.defaultDialogTransitionDuration,
       routing: routing ?? this.routing,
       parameters: parameters ?? this.parameters,
     );
@@ -226,9 +214,6 @@ class ConfigData {
         other.defaultOpaqueRoute == defaultOpaqueRoute &&
         other.defaultTransitionDuration == defaultTransitionDuration &&
         other.defaultTransitionCurve == defaultTransitionCurve &&
-        other.defaultDialogTransitionCurve == defaultDialogTransitionCurve &&
-        other.defaultDialogTransitionDuration ==
-            defaultDialogTransitionDuration &&
         other.routing == routing &&
         mapEquals(other.parameters, parameters);
   }
@@ -269,8 +254,6 @@ class ConfigData {
         defaultOpaqueRoute.hashCode ^
         defaultTransitionDuration.hashCode ^
         defaultTransitionCurve.hashCode ^
-        defaultDialogTransitionCurve.hashCode ^
-        defaultDialogTransitionDuration.hashCode ^
         routing.hashCode ^
         parameters.hashCode;
   }
@@ -342,7 +325,6 @@ class GetRootState extends State<GetRoot> with WidgetsBindingObserver {
 
   void onClose() {
     config.onDispose?.call();
-    config.snackBarQueue.disposeControllers();
     RouterReportManager.instance.clearRouteKeys();
     RouterReportManager.dispose();
     Get.resetInstance(clearRouteBindings: true);

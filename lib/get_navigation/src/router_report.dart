@@ -97,7 +97,7 @@ class RouterReportManager<T> {
   /// Clears from memory registered Instances associated with [routeName] when
   /// using `Get.smartManagement` as [SmartManagement.full] or
   /// [SmartManagement.keepFactory]
-  /// Meant for internal usage of `GetPageRoute` and `GetDialogRoute`
+  /// Meant for internal usage of `GetPageRoute`
   void _removeDependencyByRoute(T routeName) {
     final keysToRemove = <String>[];
 

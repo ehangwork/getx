@@ -115,7 +115,7 @@ void main() {
     for (final entry in const [
       'GetX / GetBuilder / Obx', 'Rx 类型', 'Worker', 'ScrollMixin 分页',
       '路由跳转', '路由过渡', '嵌套路由',
-      '浮层', '依赖绑定', '实例管理', 'App 生命周期',
+      '依赖绑定', '实例管理', 'App 生命周期',
       'StateController + futurize',
     ]) {
       await scrollTo(tester, find.text(entry));
@@ -171,45 +171,6 @@ void main() {
     final after = tester.widgetList(find.byType(ListTile)).length;
     expect(after, greaterThan(before), reason: '滚到底没有加载出下一页');
     noException(tester, 'ScrollMixin 分页');
-  });
-
-  testWidgets('浮层：Snackbar / Dialog / BottomSheet', (tester) async {
-    await boot(tester);
-    await tapText(tester, '浮层');
-
-    await tapText(tester, 'Get.snackbar');
-    await tapText(tester, 'Get.rawSnackbar');
-    await tapText(tester, 'Get.rawSnackbar + closeCurrentSnackbar');
-
-    await tapText(tester, 'Get.dialog');
-    expect(find.text('这是通过 Get.dialog 打开的自定义内容。'), findsOneWidget);
-    await tapText(tester, '关闭');
-
-    await tapText(tester, 'Get.defaultDialog');
-    expect(find.text('defaultDialog'), findsOneWidget);
-    expect(find.text('确认要继续吗？'), findsOneWidget);
-    await tapText(tester, '确定');
-    await settle(tester);
-    // 历史栈修好之后，Get.back 会真的把那一页从声明式 pages 里摘掉；
-    // Flutter 的 _updatePages 删页时会顺带丢弃夹在中间的命令式路由（dialog 是命令式的），
-    // 所以 defaultDialog 点确定现在会正常关闭——修之前这里是不关的。
-    expect(find.text('defaultDialog'), findsNothing);
-
-    await tapText(tester, 'Get.defaultDialog + content');
-    expect(find.text('选项一'), findsOneWidget);
-    await tapText(tester, '选项一');
-
-    await tapText(tester, 'Get.bottomSheet');
-    expect(find.text('选一个数字'), findsOneWidget);
-    await tapText(tester, '1');
-    await settle(tester, frames: 6);
-    await scrollToTop(tester);
-
-    await tapText(tester, 'Get.bottomSheet + 立即再弹一条');
-    await settle(tester, frames: 3);
-    expect(find.text('选一个数字'), findsOneWidget);
-    await tapText(tester, '2');
-    noException(tester, '浮层');
   });
 
   testWidgets('依赖绑定', (tester) async {

@@ -602,15 +602,6 @@ Get.rawRoute
 // give access to Routing API from GetObserver
 Get.routing
 
-// check if snackbar is open
-Get.isSnackbarOpen
-
-// check if dialog is open
-Get.isDialogOpen
-
-// check if bottomsheet is open
-Get.isBottomSheetOpen
-
 // remove one route.
 Get.removeRoute()
 

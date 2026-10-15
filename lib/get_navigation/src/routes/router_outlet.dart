@@ -145,7 +145,6 @@ class GetRouterOutlet extends RouterOutlet<GetDelegate, RouteDecoder> {
             ].whereType<GetPage>();
 
             if (pageRes.isNotEmpty) {
-              if (navigatorKey != null) rDelegate.activeOutletKey = navigatorKey;
               return InheritedNavigator(
                 navigatorKey: navigatorKey ??
                     Get.rootController.rootDelegate.navigatorKey,

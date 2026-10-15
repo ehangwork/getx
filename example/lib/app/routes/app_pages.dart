@@ -21,7 +21,6 @@ import '../modules/menu/bindings/catalog_binding.dart';
 import '../modules/menu/views/menu_view.dart';
 import '../modules/navigation/views/navigation_target_view.dart';
 import '../modules/navigation/views/navigation_view.dart';
-import '../modules/overlays/views/overlays_view.dart';
 import '../modules/pagination/bindings/pagination_binding.dart';
 import '../modules/pagination/views/pagination_view.dart';
 import '../modules/product_details/bindings/product_details_binding.dart';
@@ -175,11 +174,6 @@ class AppPages {
       name: Routes.bindings,
       page: () => const BindingsDemoView(),
       binding: BindingsDemoBinding(),
-      participatesInRootNavigator: true,
-    ),
-    GetPage(
-      name: Routes.overlays,
-      page: () => const OverlaysView(),
       participatesInRootNavigator: true,
     ),
     GetPage(

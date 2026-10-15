@@ -296,9 +296,8 @@ void main() {
 ```dart
 class MiddleWare {
   static observer(Routing routing) {
-    ///你除了可以监听路由外，还可以监听每个页面上的SnackBars、Dialogs和Bottomsheets。
-    if (routing.current == '/second' && !routing.isSnackbar) {
-      Get.snackbar("Hi", "You are on second route");
+    if (routing.current == '/second') {
+      print('second route called');
     } else if (routing.current =='/third'){
       print('last route called');
     }
@@ -314,12 +313,6 @@ class First extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            Get.snackbar("hi", "i am a modern snackbar");
-          },
-        ),
         title: Text('First Route'),
       ),
       body: Center(
@@ -339,12 +332,6 @@ class Second extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            Get.snackbar("hi", "i am a modern snackbar");
-          },
-        ),
         title: Text('second Route'),
       ),
       body: Center(
@@ -381,130 +368,9 @@ class Third extends StatelessWidget {
 
 ## 免context导航
 
-### SnackBars
-
-用Flutter创建一个简单的SnackBar，你必须获得Scaffold的context，或者你必须使用一个GlobalKey附加到你的Scaffold上。
-
-```dart
-final snackBar = SnackBar(
-  content: Text('Hi!'),
-  action: SnackBarAction(
-    label: 'I am a old and ugly snackbar :(',
-    onPressed: (){}
-  ),
-);
-// 在小组件树中找到脚手架并使用它显示一个SnackBars。
-Scaffold.of(context).showSnackBar(snackBar);
-```
-
-用Get：
-
-```dart
-Get.snackbar('Hi', 'i am a modern snackbar');
-```
-
-有了Get，你所要做的就是在你代码的任何地方调用你的Get.snackbar，或者按照你的意愿定制它。
-
-```dart
-Get.snackbar(
-  "Hey i'm a Get SnackBar!", // title
-  "It's unbelievable! I'm using SnackBar without context, without boilerplate, without Scaffold, it is something truly amazing!", // message
-  icon: Icon(Icons.alarm),
-  shouldIconPulse: true,
-  onTap:(){},
-  barBlur: 20,
-  isDismissible: true,
-  duration: Duration(seconds: 3),
-);
-
-
-  ////////// ALL FEATURES //////////
-  //     Color colorText,
-  //     Duration duration,
-  //     SnackPosition snackPosition,
-  //     Widget titleText,
-  //     Widget messageText,
-  //     bool instantInit,
-  //     Widget icon,
-  //     bool shouldIconPulse,
-  //     double maxWidth,
-  //     EdgeInsets margin,
-  //     EdgeInsets padding,
-  //     double borderRadius,
-  //     Color borderColor,
-  //     double borderWidth,
-  //     Color backgroundColor,
-  //     Color leftBarIndicatorColor,
-  //     List<BoxShadow> boxShadows,
-  //     Gradient backgroundGradient,
-  //     TextButton mainButton,
-  //     OnTap onTap,
-  //     bool isDismissible,
-  //     bool showProgressIndicator,
-  //     AnimationController progressIndicatorController,
-  //     Color progressIndicatorBackgroundColor,
-  //     Animation<Color> progressIndicatorValueColor,
-  //     SnackStyle snackStyle,
-  //     Curve forwardAnimationCurve,
-  //     Curve reverseAnimationCurve,
-  //     Duration animationDuration,
-  //     double barBlur,
-  //     double overlayBlur,
-  //     Color overlayColor,
-  //     Form userInputForm
-  ///////////////////////////////////
-```
-
-如果您喜欢传统的SnackBars，或者想从头开始定制，包括只添加一行(Get.snackbar使用了一个强制性的标题和信息)，您可以使用
-`Get.rawSnackbar();`它提供了建立Get.snackbar的RAW API。
-
-### Dialogs
-
-打开Dialogs：
-
-```dart
-Get.dialog(YourDialogWidget());
-```
-
-打开默认Dialogs：
-
-```dart
-Get.defaultDialog(
-  onConfirm: () => print("Ok"),
-  middleText: "Dialog made in 3 lines of code"
-);
-```
-
-你也可以用Get.generalDialog代替showGeneralDialog。
-
-对于所有其他的FlutterDialogs小部件，包括cupertinos，你可以使用Get.overlayContext来代替context，并在你的代码中任何地方打开它。
+对于所有其他的Flutter弹层小部件，包括cupertinos，你可以使用Get.overlayContext来代替context，并在你的代码中任何地方打开它。
 对于不使用Overlay的小组件，你可以使用Get.context。
 这两个context在99%的情况下都可以代替你的UIcontext，除了在没有导航context的情况下使用 inheritedWidget的情况。
-
-### BottomSheets
-
-Get.bottomSheet类似于showModalBottomSheet，但不需要context：
-
-```dart
-Get.bottomSheet(
-  Container(
-    child: Wrap(
-      children: <Widget>[
-        ListTile(
-          leading: Icon(Icons.music_note),
-          title: Text('Music'),
-          onTap: () {}
-        ),
-        ListTile(
-          leading: Icon(Icons.videocam),
-          title: Text('Video'),
-          onTap: () {},
-        ),
-      ],
-    ),
-  )
-);
-```
 
 ## 嵌套导航
 

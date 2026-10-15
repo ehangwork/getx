@@ -76,13 +76,6 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
   @override
   GlobalKey<NavigatorState> navigatorKey;
 
-  /// 最近一次构建的嵌套 outlet 的 Navigator。
-  ///
-  /// 壳的 outlet 先构建、内层 outlet 后构建，所以最后一个就是用户当前所在的那层。
-  /// 浮层（Snackbar / Dialog / BottomSheet）默认要推到这一层，
-  /// 否则压在根 navigator 上会盖住 outlet 里渲染出来的页面。
-  GlobalKey<NavigatorState>? activeOutletKey;
-
   final String? restorationScopeId;
 
   GetDelegate({

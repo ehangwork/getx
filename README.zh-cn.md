@@ -576,15 +576,6 @@ Get.rawRoute
 // 允许从GetObserver访问Rounting API。
 Get.routing
 
-// 检查 snackbar 是否打开
-Get.isSnackbarOpen
-
-// 检查 dialog 是否打开
-Get.isDialogOpen
-
-// 检查 bottomsheet 是否打开
-Get.isBottomSheetOpen
-
 // 删除一个路由。
 Get.removeRoute()
 

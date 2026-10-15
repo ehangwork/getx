@@ -29,9 +29,7 @@ class MenuView extends GetView<CatalogController> {
       _MenuItem('嵌套路由', 'GetRouterOutlet + 中间件 + GetWidget',
           Icons.account_tree_outlined, Routes.home),
     ]),
-    _MenuGroup('浮层与依赖', [
-      _MenuItem('浮层', 'Snackbar / Dialog / BottomSheet',
-          Icons.layers_outlined, Routes.overlays),
+    _MenuGroup('依赖管理', [
       _MenuItem('依赖绑定', 'put / lazyPut / spawn / create / tag',
           Icons.link, Routes.bindings),
       _MenuItem('实例管理', 'isRegistered / delete / reset',

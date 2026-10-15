@@ -529,33 +529,6 @@ void main() {
     expect(find.byType(FirstScreen), findsOneWidget);
   });
 
-  testWidgets(
-      "Get.back with closeOverlays pops both snackbar and current route",
-      (tester) async {
-    await tester.pumpWidget(
-      Wrapper(
-        defaultTransition: Transition.circularReveal,
-        child: Container(),
-      ),
-    );
-
-    // await tester.pump();
-
-    Get.to(() => const FirstScreen());
-    await tester.pumpAndSettle();
-    Get.to(() => const SecondScreen());
-    await tester.pumpAndSettle();
-    Get.snackbar('title', "message");
-    await tester.pumpAndSettle();
-    Get.backLegacy(closeOverlays: true);
-
-    await tester.pumpAndSettle();
-
-    expect(Get.isSnackbarOpen, false);
-
-    expect(find.byType(FirstScreen), findsOneWidget);
-  });
-
   testWidgets("Get.until", (tester) async {
     await tester.pumpWidget(WrapperNamed(
       initialRoute: '/first',

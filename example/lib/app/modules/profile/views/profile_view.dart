@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
-import '../../../routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -23,28 +22,10 @@ class ProfileView extends GetView<ProfileController> {
               tag: 'heroLogo',
               child: FlutterLogo(),
             ),
-            MaterialButton(
-              child: const Text('Show a test dialog'),
-              onPressed: () {
-                //shows a dialog
-                Get.defaultDialog(
-                  title: 'Test Dialog !!',
-                  barrierDismissible: true,
-                );
-              },
-            ),
-            MaterialButton(
-              child: const Text('Show a test dialog in Home router outlet'),
-              onPressed: () {
-                //shows a dialog
-                Get.defaultDialog(
-                  title: 'Test Dialog In Home Outlet !!',
-                  barrierDismissible: true,
-                  id: Routes.home,
-                  // navigatorKey: Get.nestedKey(Routes.HOME),
-                );
-              },
-            )
+            const SizedBox(height: 16),
+            // 这个 tab 由 EnsureAuthMiddleware 守着，进得来说明登录态通了
+            Text('ProfileController 已注册：${Get.isRegistered<ProfileController>()}'),
+            Text('当前路由：${Get.currentRoute}'),
           ],
         ),
       ),

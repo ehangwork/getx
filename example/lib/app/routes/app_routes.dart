@@ -26,7 +26,6 @@ abstract class Routes {
   static const rxTypes = '/rx-types';
   static const workers = '/workers';
   static const bindings = '/bindings';
-  static const overlays = '/overlays';
   static const navigation = '/navigation';
   static const transitions = '/transitions';
   static const transitionTarget = '/transition-target';

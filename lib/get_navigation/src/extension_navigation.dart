@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get_navigation/src/routes/test_kit.dart';
 
-import '../../get_core/src/flutter_engine.dart';
 import '../../get_core/src/get_interface.dart';
 import '../../get_core/src/get_main.dart';
 import '../../get_instance/src/bindings_interface.dart';
@@ -13,515 +12,12 @@ import 'routes/get_route.dart';
 import 'routes/get_router_delegate.dart';
 import 'routes/observers/route_observer.dart';
 import 'routes/transitions_type.dart';
-import 'bottomsheet/bottomsheet.dart';
-import 'snackbar/snackbar.dart';
-import 'snackbar/snackbar_controller.dart';
-import 'dialog/dialog_route.dart';
 import 'root/get_root.dart';
 
 /// It replaces the Flutter Navigator, but needs no context.
 /// You can to use navigator.push(YourRoute()) rather
 /// Navigator.push(context, YourRoute());
 NavigatorState? get navigator => GetNavigationExt(Get).key.currentState;
-
-extension ExtensionBottomSheet on GetInterface {
-  Future<T?> bottomSheet<T>(
-    Widget bottomsheet, {
-    Color? backgroundColor,
-    double? elevation,
-    bool persistent = true,
-    ShapeBorder? shape,
-    Clip? clipBehavior,
-    Color? barrierColor,
-    bool? ignoreSafeArea,
-    bool isScrollControlled = false,
-    bool useRootNavigator = false,
-    bool isDismissible = true,
-    bool enableDrag = true,
-    RouteSettings? settings,
-    Duration? enterBottomSheetDuration,
-    Duration? exitBottomSheetDuration,
-    Curve? curve,
-  }) {
-    return _bottomSheetNavigator(useRootNavigator).push(GetModalBottomSheetRoute<T>(
-      builder: (_) => bottomsheet,
-      isPersistent: persistent,
-      // theme: Theme.of(key.currentContext, shadowThemeOnly: true),
-      theme: Theme.of(key.currentContext!),
-      isScrollControlled: isScrollControlled,
-
-      barrierLabel: MaterialLocalizations.of(key.currentContext!)
-          .modalBarrierDismissLabel,
-
-      backgroundColor: backgroundColor ?? Colors.transparent,
-      elevation: elevation,
-      shape: shape,
-      removeTop: ignoreSafeArea ?? true,
-      clipBehavior: clipBehavior,
-      isDismissible: isDismissible,
-      modalBarrierColor: barrierColor,
-      settings: settings,
-      enableDrag: enableDrag,
-      enterBottomSheetDuration:
-          enterBottomSheetDuration ?? const Duration(milliseconds: 250),
-      exitBottomSheetDuration:
-          exitBottomSheetDuration ?? const Duration(milliseconds: 200),
-      curve: curve,
-    ));
-  }
-}
-
-/// bottomSheet 要推到「当前页面所在的那个 navigator」上，而不是固定推到根 navigator。
-///
-/// 嵌套路由下有两种「当前页」：
-///   - 声明了 participatesInRootNavigator 的页，和壳一起待在根 navigator 的真实栈里
-///   - 其余页面渲染在壳的 outlet 里
-///
-/// 判断办法是看根 navigator 的栈深：栈里不止一页时，最上面那页就是当前页，
-/// 浮层必须压在这一层，推到 outlet 会被当前页挡住（表现为「弹层不出现」）；
-/// 只有一页时当前页才在 outlet 里，用最后构建的那层 outlet。
-///
-/// 壳的 outlet 即使被根层盖住也仍然在构建，所以只看「最后构建的 outlet」会指错。
-NavigatorState _bottomSheetNavigator(bool useRootNavigator) {
-  if (!useRootNavigator) {
-    final root = Get.rootController.rootDelegate.navigatorKey.currentState;
-    // 根 navigator 栈深 > 1：当前页在根层，压在上面
-    if (root == null || !root.canPop()) {
-      final outlet =
-          Get.rootController.rootDelegate.activeOutletKey?.currentState;
-      if (outlet != null && outlet.mounted) return outlet;
-    }
-  }
-  return Navigator.of(Get.overlayContext!, rootNavigator: true);
-}
-
-extension ExtensionDialog on GetInterface {
-  /// Show a dialog.
-  /// You can pass a [transitionDuration] and/or [transitionCurve],
-  /// overriding the defaults when the dialog shows up and closes.
-  /// When the dialog closes, uses those animations in reverse.
-  Future<T?> dialog<T>(
-    Widget widget, {
-    bool barrierDismissible = true,
-    Color? barrierColor,
-    bool useSafeArea = true,
-    GlobalKey<NavigatorState>? navigatorKey,
-    Object? arguments,
-    Duration? transitionDuration,
-    Curve? transitionCurve,
-    String? name,
-    RouteSettings? routeSettings,
-    String? id,
-  }) {
-    assert(debugCheckHasMaterialLocalizations(context!));
-
-    //  final theme = Theme.of(context, shadowThemeOnly: true);
-    final theme = Theme.of(context!);
-    return generalDialog<T>(
-      pageBuilder: (buildContext, animation, secondaryAnimation) {
-        final pageChild = widget;
-        Widget dialog = Builder(builder: (context) {
-          return Theme(data: theme, child: pageChild);
-        });
-        if (useSafeArea) {
-          dialog = SafeArea(child: dialog);
-        }
-        return dialog;
-      },
-      barrierDismissible: barrierDismissible,
-      barrierLabel: MaterialLocalizations.of(context!).modalBarrierDismissLabel,
-      barrierColor: barrierColor ?? Colors.black54,
-      transitionDuration: transitionDuration ?? defaultDialogTransitionDuration,
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: transitionCurve ?? defaultDialogTransitionCurve,
-          ),
-          child: child,
-        );
-      },
-      navigatorKey: navigatorKey,
-      routeSettings:
-          routeSettings ?? RouteSettings(arguments: arguments, name: name),
-      id: id,
-    );
-  }
-
-  /// Api from showGeneralDialog with no context
-  Future<T?> generalDialog<T>(
-      {required RoutePageBuilder pageBuilder,
-      bool barrierDismissible = false,
-      String? barrierLabel,
-      Color barrierColor = const Color(0x80000000),
-      Duration transitionDuration = const Duration(milliseconds: 200),
-      RouteTransitionsBuilder? transitionBuilder,
-      GlobalKey<NavigatorState>? navigatorKey,
-      RouteSettings? routeSettings,
-      String? id}) {
-    assert(!barrierDismissible || barrierLabel != null);
-    final key = navigatorKey ?? Get.nestedKey(id)?.navigatorKey;
-    final nav = key?.currentState ??
-        Navigator.of(overlayContext!,
-            rootNavigator:
-                true); //overlay context will always return the root navigator
-    return nav.push<T>(
-      GetDialogRoute<T>(
-        pageBuilder: pageBuilder,
-        barrierDismissible: barrierDismissible,
-        barrierLabel: barrierLabel,
-        barrierColor: barrierColor,
-        transitionDuration: transitionDuration,
-        transitionBuilder: transitionBuilder,
-        settings: routeSettings,
-      ),
-    );
-  }
-
-  /// Custom UI Dialog.
-  Future<T?> defaultDialog<T>({
-    String title = "Alert",
-    EdgeInsetsGeometry? titlePadding,
-    TextStyle? titleStyle,
-    Widget? content,
-    String? id,
-    EdgeInsetsGeometry? contentPadding,
-    VoidCallback? onConfirm,
-    VoidCallback? onCancel,
-    VoidCallback? onCustom,
-    Color? cancelTextColor,
-    Color? confirmTextColor,
-    String? textConfirm,
-    String? textCancel,
-    String? textCustom,
-    Widget? confirm,
-    Widget? cancel,
-    Widget? custom,
-    Color? backgroundColor,
-    bool barrierDismissible = true,
-    Color? buttonColor,
-    String middleText = "\n",
-    TextStyle? middleTextStyle,
-    double radius = 20.0,
-    //   ThemeData themeData,
-    List<Widget>? actions,
-
-    // onWillPop Scope
-    PopInvokedWithResultCallback<T>? onWillPop,
-
-    // the navigator used to push the dialog
-    GlobalKey<NavigatorState>? navigatorKey,
-  }) {
-    var leanCancel = onCancel != null || textCancel != null;
-    var leanConfirm = onConfirm != null || textConfirm != null;
-    actions ??= [];
-
-    if (cancel != null) {
-      actions.add(cancel);
-    } else {
-      if (leanCancel) {
-        actions.add(TextButton(
-          style: TextButton.styleFrom(
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            shape: RoundedRectangleBorder(
-                side: BorderSide(
-                    color: buttonColor ?? theme.colorScheme.secondary,
-                    width: 2,
-                    style: BorderStyle.solid),
-                borderRadius: BorderRadius.circular(radius)),
-          ),
-          onPressed: () {
-            if (onCancel == null) {
-              //TODO: Close current dialog after api change
-              closeAllDialogs();
-            } else {
-              onCancel.call();
-            }
-          },
-          child: Text(
-            textCancel ?? "Cancel",
-            style: TextStyle(
-                color: cancelTextColor ?? theme.colorScheme.secondary),
-          ),
-        ));
-      }
-    }
-    if (confirm != null) {
-      actions.add(confirm);
-    } else {
-      if (leanConfirm) {
-        actions.add(TextButton(
-            style: TextButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              backgroundColor: buttonColor ?? theme.colorScheme.secondary,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(radius)),
-            ),
-            child: Text(
-              textConfirm ?? "Ok",
-              style: TextStyle(
-                  color: confirmTextColor ?? theme.colorScheme.surface),
-            ),
-            onPressed: () {
-              onConfirm?.call();
-            }));
-      }
-    }
-
-    Widget baseAlertDialog = Builder(builder: (context) {
-      return AlertDialog(
-        titlePadding: titlePadding ?? const EdgeInsets.all(8),
-        contentPadding: contentPadding ?? const EdgeInsets.all(8),
-
-        backgroundColor:
-            backgroundColor ?? DialogTheme.of(context).backgroundColor,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(radius))),
-        title: Text(title, textAlign: TextAlign.center, style: titleStyle),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            content ??
-                Text(middleText,
-                    textAlign: TextAlign.center, style: middleTextStyle),
-            const SizedBox(height: 16),
-            ButtonTheme(
-              minWidth: 78.0,
-              height: 34.0,
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
-                children: actions!,
-              ),
-            )
-          ],
-        ),
-        // actions: actions, // ?? <Widget>[cancelButton, confirmButton],
-        buttonPadding: EdgeInsets.zero,
-      );
-    });
-
-    return dialog<T>(
-      onWillPop != null
-          ? PopScope<T>(
-              onPopInvokedWithResult: (didPop, result) =>
-                  onWillPop(didPop, result),
-              // onPopInvoked: onWillPop,
-              child: baseAlertDialog,
-            )
-          : baseAlertDialog,
-      barrierDismissible: barrierDismissible,
-      navigatorKey: navigatorKey,
-      id: id,
-    );
-  }
-}
-
-extension ExtensionSnackbar on GetInterface {
-  SnackbarController rawSnackbar({
-    String? title,
-    String? message,
-    Widget? titleText,
-    Widget? messageText,
-    Widget? icon,
-    bool instantInit = true,
-    bool shouldIconPulse = true,
-    double? maxWidth,
-    EdgeInsets margin = const EdgeInsets.all(0.0),
-    EdgeInsets padding = const EdgeInsets.all(16),
-    double borderRadius = 0.0,
-    Color? borderColor,
-    double borderWidth = 1.0,
-    Color backgroundColor = const Color(0xFF303030),
-    Color? leftBarIndicatorColor,
-    List<BoxShadow>? boxShadows,
-    Gradient? backgroundGradient,
-    Widget? mainButton,
-    OnTap? onTap,
-    Duration? duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    DismissDirection? dismissDirection,
-    bool showProgressIndicator = false,
-    AnimationController? progressIndicatorController,
-    Color? progressIndicatorBackgroundColor,
-    Animation<Color>? progressIndicatorValueColor,
-    SnackPosition snackPosition = SnackPosition.bottom,
-    SnackStyle snackStyle = SnackStyle.floating,
-    Curve forwardAnimationCurve = Curves.easeOutCirc,
-    Curve reverseAnimationCurve = Curves.easeOutCirc,
-    Duration animationDuration = const Duration(seconds: 1),
-    SnackbarStatusCallback? snackbarStatus,
-    double barBlur = 0.0,
-    double overlayBlur = 0.0,
-    Color? overlayColor,
-    Form? userInputForm,
-  }) {
-    final getSnackBar = GetSnackBar(
-      snackbarStatus: snackbarStatus,
-      title: title,
-      message: message,
-      titleText: titleText,
-      messageText: messageText,
-      snackPosition: snackPosition,
-      borderRadius: borderRadius,
-      margin: margin,
-      duration: duration,
-      barBlur: barBlur,
-      backgroundColor: backgroundColor,
-      icon: icon,
-      shouldIconPulse: shouldIconPulse,
-      maxWidth: maxWidth,
-      padding: padding,
-      borderColor: borderColor,
-      borderWidth: borderWidth,
-      leftBarIndicatorColor: leftBarIndicatorColor,
-      boxShadows: boxShadows,
-      backgroundGradient: backgroundGradient,
-      mainButton: mainButton,
-      onTap: onTap,
-      isDismissible: isDismissible,
-      dismissDirection: dismissDirection,
-      showProgressIndicator: showProgressIndicator,
-      progressIndicatorController: progressIndicatorController,
-      progressIndicatorBackgroundColor: progressIndicatorBackgroundColor,
-      progressIndicatorValueColor: progressIndicatorValueColor,
-      snackStyle: snackStyle,
-      forwardAnimationCurve: forwardAnimationCurve,
-      reverseAnimationCurve: reverseAnimationCurve,
-      animationDuration: animationDuration,
-      overlayBlur: overlayBlur,
-      overlayColor: overlayColor,
-      userInputForm: userInputForm,
-    );
-
-    final controller = SnackbarController(getSnackBar);
-
-    if (instantInit) {
-      controller.show();
-    } else {
-      Engine.instance.addPostFrameCallback((_) {
-        controller.show();
-      });
-    }
-    return controller;
-  }
-
-  SnackbarController showSnackbar(GetSnackBar snackbar) {
-    final controller = SnackbarController(snackbar);
-    controller.show();
-    return controller;
-  }
-
-  SnackbarController snackbar(
-    String title,
-    String message, {
-    Color? colorText,
-    Duration? duration = const Duration(seconds: 3),
-
-    /// with instantInit = false you can put snackbar on initState
-    bool instantInit = true,
-    SnackPosition? snackPosition,
-    Widget? titleText,
-    Widget? messageText,
-    Widget? icon,
-    bool? shouldIconPulse,
-    double? maxWidth,
-    EdgeInsets? margin,
-    EdgeInsets? padding,
-    double? borderRadius,
-    Color? borderColor,
-    double? borderWidth,
-    Color? backgroundColor,
-    Color? leftBarIndicatorColor,
-    List<BoxShadow>? boxShadows,
-    Gradient? backgroundGradient,
-    TextButton? mainButton,
-    OnTap? onTap,
-    OnHover? onHover,
-    bool? isDismissible,
-    bool? showProgressIndicator,
-    DismissDirection? dismissDirection,
-    AnimationController? progressIndicatorController,
-    Color? progressIndicatorBackgroundColor,
-    Animation<Color>? progressIndicatorValueColor,
-    SnackStyle? snackStyle,
-    Curve? forwardAnimationCurve,
-    Curve? reverseAnimationCurve,
-    Duration? animationDuration,
-    double? barBlur,
-    double? overlayBlur,
-    SnackbarStatusCallback? snackbarStatus,
-    Color? overlayColor,
-    Form? userInputForm,
-  }) {
-    final getSnackBar = GetSnackBar(
-        snackbarStatus: snackbarStatus,
-        titleText: titleText ??
-            Text(
-              title,
-              style: TextStyle(
-                color: colorText ?? iconColor ?? Colors.black,
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-              ),
-            ),
-        messageText: messageText ??
-            Text(
-              message,
-              style: TextStyle(
-                color: colorText ?? iconColor ?? Colors.black,
-                fontWeight: FontWeight.w300,
-                fontSize: 14,
-              ),
-            ),
-        snackPosition: snackPosition ?? SnackPosition.top,
-        borderRadius: borderRadius ?? 15,
-        margin: margin ?? const EdgeInsets.symmetric(horizontal: 10),
-        duration: duration,
-        barBlur: barBlur ?? 7.0,
-        backgroundColor: backgroundColor ?? Colors.grey.withValues(alpha: 0.2),
-        icon: icon,
-        shouldIconPulse: shouldIconPulse ?? true,
-        maxWidth: maxWidth,
-        padding: padding ?? const EdgeInsets.all(16),
-        borderColor: borderColor,
-        borderWidth: borderWidth,
-        leftBarIndicatorColor: leftBarIndicatorColor,
-        boxShadows: boxShadows,
-        backgroundGradient: backgroundGradient,
-        mainButton: mainButton,
-        onTap: onTap,
-        onHover: onHover,
-        isDismissible: isDismissible ?? true,
-        dismissDirection: dismissDirection,
-        showProgressIndicator: showProgressIndicator ?? false,
-        progressIndicatorController: progressIndicatorController,
-        progressIndicatorBackgroundColor: progressIndicatorBackgroundColor,
-        progressIndicatorValueColor: progressIndicatorValueColor,
-        snackStyle: snackStyle ?? SnackStyle.floating,
-        forwardAnimationCurve: forwardAnimationCurve ?? Curves.easeOutCirc,
-        reverseAnimationCurve: reverseAnimationCurve ?? Curves.easeOutCirc,
-        animationDuration: animationDuration ?? const Duration(seconds: 1),
-        overlayBlur: overlayBlur ?? 0.0,
-        overlayColor: overlayColor ?? Colors.transparent,
-        userInputForm: userInputForm);
-
-    final controller = SnackbarController(getSnackBar);
-
-    if (instantInit) {
-      controller.show();
-    } else {
-      //routing.isSnackbar = true;
-      Engine.instance.addPostFrameCallback((_) {
-        controller.show();
-      });
-    }
-    return controller;
-  }
-}
 
 extension GetNavigationExt on GetInterface {
   /// **Navigation.push()** shortcut.<br><br>
@@ -696,8 +192,6 @@ extension GetNavigationExt on GetInterface {
   /// `Get.until((route) => Get.currentRoute == '/home')`so when you get to home page,
   ///
   /// or also like this:
-  /// `Get.until((route) => !Get.isDialogOpen())`, to make sure the
-  /// dialog is closed
   void until(bool Function(GetPage<dynamic>) predicate, {String? id}) {
     // if (key.currentState.mounted) // add this if appear problems on future with route navigate
     // when widget don't mounted
@@ -718,9 +212,7 @@ extension GetNavigationExt on GetInterface {
   /// `Get.offNamedUntil(page, ModalRoute.withName('/home'))`
   /// to pop routes in stack until home,
   /// or like this:
-  /// `Get.offNamedUntil((route) => !Get.isDialogOpen())`,
-  /// to make sure the dialog is closed
-  ///
+
   /// Note: Always put a slash on the route name ('/page1'), to avoid unexpected errors
   Future<T?>? offNamedUntil<T>(
     String page,
@@ -794,9 +286,6 @@ extension GetNavigationExt on GetInterface {
   ///
   /// [predicate] can be used like this:
   /// `Get.until((route) => Get.currentRoute == '/home')`so when you get to home page,
-  /// or also like
-  /// `Get.until((route) => !Get.isDialogOpen())`, to make sure the dialog
-  /// is closed
   ///
   /// [id] is for when you are using nested navigation,
   /// as explained in documentation
@@ -823,20 +312,7 @@ extension GetNavigationExt on GetInterface {
     );
   }
 
-  /// Returns true if a Snackbar, Dialog or BottomSheet is currently OPEN
-  bool get isOverlaysOpen =>
-      (isSnackbarOpen || isDialogOpen! || isBottomSheetOpen!);
-
-  /// Returns true if there is no Snackbar, Dialog or BottomSheet open
-  bool get isOverlaysClosed =>
-      (!isSnackbarOpen && !isDialogOpen! && !isBottomSheetOpen!);
-
   /// **Navigation.popUntil()** shortcut.<br><br>
-  ///
-  /// Pop the current page, snackbar, dialog or bottomsheet in the stack
-  ///
-  /// if your set [closeOverlays] to true, Get.back() will close the
-  /// currently open snackbar/dialog/bottomsheet AND the current page
   ///
   /// [id] is for when you are using nested navigation,
   /// as explained in documentation
@@ -867,11 +343,6 @@ extension GetNavigationExt on GetInterface {
     }
   }
 
-  /// Pop the current page, snackbar, dialog or bottomsheet in the stack
-  ///
-  /// if your set [closeOverlays] to true, Get.back() will close the
-  /// currently open snackbar/dialog/bottomsheet AND the current page
-  ///
   /// [id] is for when you are using nested navigation,
   /// as explained in documentation
   ///
@@ -879,15 +350,10 @@ extension GetNavigationExt on GetInterface {
   /// from your business logic.
   void backLegacy<T>({
     T? result,
-    bool closeOverlays = false,
     bool canPop = true,
     int times = 1,
     String? id,
   }) {
-    if (closeOverlays) {
-      closeAllOverlays();
-    }
-
     if (times < 1) {
       times = 1;
     }
@@ -906,91 +372,6 @@ extension GetNavigationExt on GetInterface {
         return searchDelegate(id).navigatorKey.currentState?.pop<T>(result);
       }
     }
-  }
-
-  void closeAllDialogsAndBottomSheets(
-    String? id,
-  ) {
-    // It can not be divided, because dialogs and bottomsheets can not be consecutive
-    while ((isDialogOpen! && isBottomSheetOpen!)) {
-      closeOverlay(id: id);
-    }
-  }
-
-  void closeAllDialogs({
-    String? id,
-  }) {
-    while ((isDialogOpen!)) {
-      closeOverlay(id: id);
-    }
-  }
-
-  /// Close the currently open dialog, returning a [result], if provided
-  void closeDialog<T>({String? id, T? result}) {
-    // Stop if there is no dialog open
-    if (isDialogOpen == null || !isDialogOpen!) return;
-
-    closeOverlay(id: id, result: result);
-  }
-
-  void closeBottomSheet<T>({String? id, T? result}) {
-    // Stop if there is no bottomsheet open
-    if (isBottomSheetOpen == null || !isBottomSheetOpen!) return;
-
-    closeOverlay(id: id, result: result);
-  }
-
-  /// Close the current overlay returning the [result], if provided
-  void closeOverlay<T>({
-    String? id,
-    T? result,
-  }) {
-    searchDelegate(id).navigatorKey.currentState?.pop(result);
-  }
-
-  void closeAllBottomSheets({
-    String? id,
-  }) {
-    while ((isBottomSheetOpen!)) {
-      searchDelegate(id).navigatorKey.currentState?.pop();
-    }
-  }
-
-  void closeAllOverlays() {
-    closeAllDialogsAndBottomSheets(null);
-    closeAllSnackbars();
-  }
-
-  /// **Navigation.popUntil()** (with predicate) shortcut .<br><br>
-  ///
-  /// Close as many routes as defined by [times]
-  ///
-  /// [id] is for when you are using nested navigation,
-  /// as explained in documentation
-  void close<T extends Object>({
-    bool closeAll = true,
-    bool closeSnackbar = true,
-    bool closeDialog = true,
-    bool closeBottomSheet = true,
-    String? id,
-    T? result,
-  }) {
-    void handleClose(bool closeCondition, Function closeAllFunction,
-        Function closeSingleFunction,
-        [bool? isOpenCondition]) {
-      if (closeCondition) {
-        if (closeAll) {
-          closeAllFunction();
-        } else if (isOpenCondition == true) {
-          closeSingleFunction();
-        }
-      }
-    }
-
-    handleClose(closeSnackbar, closeAllSnackbars, closeCurrentSnackbar);
-    handleClose(closeDialog, closeAllDialogs, closeOverlay, isDialogOpen);
-    handleClose(closeBottomSheet, closeAllBottomSheets, closeOverlay,
-        isBottomSheetOpen);
   }
 
   /// **Navigation.pushReplacement()** shortcut .<br><br>
@@ -1084,9 +465,6 @@ extension GetNavigationExt on GetInterface {
   ///
   /// [predicate] can be used like this:
   /// `Get.until((route) => Get.currentRoute == '/home')`so when you get to home page,
-  /// or also like
-  /// `Get.until((route) => !Get.isDialogOpen())`, to make sure the dialog
-  /// is closed
   ///
   /// [id] is for when you are using nested navigation,
   /// as explained in documentation
@@ -1248,24 +626,6 @@ extension GetNavigationExt on GetInterface {
   /// give name from previous route
   String get previousRoute => routing.previous;
 
-  /// check if snackbar is open
-  bool get isSnackbarOpen =>
-      SnackbarController.isSnackbarBeingShown; //routing.isSnackbar;
-
-  void closeAllSnackbars() {
-    SnackbarController.cancelAllSnackbars();
-  }
-
-  Future<void> closeCurrentSnackbar() async {
-    await SnackbarController.closeCurrentSnackbar();
-  }
-
-  /// check if dialog is open
-  bool? get isDialogOpen => routing.isDialog;
-
-  /// check if bottomsheet is open
-  bool? get isBottomSheetOpen => routing.isBottomSheet;
-
   /// check a raw current route
   Route<dynamic>? get rawRoute => routing.route;
 
@@ -1368,14 +728,6 @@ extension GetNavigationExt on GetInterface {
   }
 
   Curve get defaultTransitionCurve => _getxController.defaultTransitionCurve;
-
-  Curve get defaultDialogTransitionCurve {
-    return _getxController.defaultDialogTransitionCurve;
-  }
-
-  Duration get defaultDialogTransitionDuration {
-    return _getxController.defaultDialogTransitionDuration;
-  }
 
   Routing get routing => _getxController.routing;
 

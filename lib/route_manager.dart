@@ -1,5 +1,5 @@
-///Get Navigator allows you to navigate routes, open snackbars,
-///dialogs and bottomsheets easily, and without the need for context.
+///Get Navigator allows you to navigate routes easily,
+///and without the need for context.
 library;
 
 export 'get_core/get_core.dart';

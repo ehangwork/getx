@@ -43,32 +43,6 @@ class CountryListView extends GetView<HomeController> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,
-              // leading 位留给返回键，snackbar 演示挪到 actions
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.add, color: Colors.white, size: 28),
-                  onPressed: () {
-                    Get.snackbar(
-                      'New Feature',
-                      'Coming soon!',
-                      snackPosition: SnackPosition.bottom,
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                      colorText: Colors.black,
-                      borderRadius: 10,
-                      duration: Duration(seconds: 3),
-                      animationDuration: Duration(milliseconds: 500),
-                      boxShadows: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
             ),
             body: SafeArea(
               child: Padding(

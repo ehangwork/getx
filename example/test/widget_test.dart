@@ -34,8 +34,8 @@ void main() {
     await scrollTo('嵌套路由');
     expect(find.text('嵌套路由'), findsOneWidget);
 
-    await scrollTo('浮层');
-    expect(find.text('浮层'), findsOneWidget);
+    await scrollTo('依赖绑定');
+    expect(find.text('依赖绑定'), findsOneWidget);
 
     await scrollTo('StateController + futurize');
     expect(find.text('StateController + futurize'), findsOneWidget);
@@ -95,7 +95,6 @@ void main() {
       Routes.rxTypes,
       Routes.workers,
       Routes.bindings,
-      Routes.overlays,
       Routes.navigation,
       Routes.transitions,
       Routes.transitionTarget,
