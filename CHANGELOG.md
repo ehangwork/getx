@@ -16,14 +16,25 @@
 
 其它破坏性变更：
 
-- iOS 侧滑返回的触发区域改为**仅限屏幕起始边缘一条带**（默认 44pt，刘海屏按安全区
+- iOS 侧滑返回的触发区域改为**仅限屏幕起始边缘一条带**（默认 24pt，刘海屏按安全区
   加宽）。此前 `buildPageTransitions` 的 `limitedSwipe` 默认 false，手势检测器用
-  `Positioned.fill` 铺满整页 —— 页面上任何位置横向拖动都会触发返回，横滑 ListView /
-  轮播 / 滑块也会被抢走手势。
-  宽度不照搬 Flutter 原生的 20pt：手指落点是约 40pt 宽的接触面，20pt 只有半个指腹，
-  单手握持时拇指弧线差十几像素就落空，且完全没有反馈。44pt 取自 Apple HIG 的最小
-  可点击区域，在 393pt 宽的手机上约占 11%，仍是明确的边缘手势。按页微调用
-  `GetPage.gestureWidth`。
+  `Positioned.fill` 铺满整页 —— 页面上任何位置横向拖动都会触发返回。
+  宽度刻意保持窄（比 Flutter 原生的 20 略宽一点），不往宽调：手势层是页面的**前置
+  兄弟节点**，命中测试时先进手势竞技场，而平局是先 resolve 的赢，所以手指只要落在
+  带内就一定压过页面里的横向 ListView / 可滚动 TabBar / PageView。Flutter 原生
+  Cupertino 是同样结构、同样毛病，换顺序也换不掉（`RenderStack.defaultHitTestChildren`
+  命中第一个就短路返回，手势层挪到页面之下会直接收不到事件）。实测带宽 44pt 时，
+  在横向列表上往回拖会出现「列表纹丝不动、页面跟着晃一下」，比误返回更糟的是列表
+  变成死区。
+- 侧滑「松手提交」的灵敏度放宽（起手难只能靠加宽触发带解决，会和横滑组件冲突；
+  提交难则与横滑组件零冲突，是灵敏度真正的来源）：
+  - 甩动判定阈值 `_kMinFlingVelocity` 1.0 → **0.5 屏宽/秒**。原先一次
+    300ms 滑 200px（≈0.83 屏/秒）的正常滑动够不到，只能落到位移判定，
+    「明明果断的一划却什么都没发生」。
+  - 位移提交阈值 0.5 → **0.4 屏宽**。原先要拖过半屏才认，页面已经跟着手指走了一半
+    却弹回去，是「滑不动」体感的一大来源。
+  按页微调触发带仍用 `GetPage.gestureWidth`，整页可滑传 `limitedSwipe: false`，
+  单页关掉侧滑传 `popGesture: false`。
 - `Get.backLegacy` 去掉了 `closeOverlays` 形参（浮层已不存在，该参数本就无效）。
 - `GetObserver` / `Routing` 去掉了 `isDialog` / `isBottomSheet` 字段。
 - `Get.previousRoute` 在 `didPop` 里的语义修正为「刚被弹出那一页的名称」；

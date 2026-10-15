@@ -114,29 +114,35 @@ Get.to(HomePage());
 ### The trigger area of the iOS swipe-back gesture
 
 On iOS the swipe-back gesture is on by default and its trigger area is **only a
-strip along the leading edge** of the screen (44pt by default, widened by the
-safe area on notched devices) — dragging anywhere else on the page does not
-trigger it, so horizontal ListViews, carousels and sliders keep their gestures.
+strip along the leading edge** of the screen (24pt by default, widened by the
+safe area on notched devices). Dragging anywhere else on the page does nothing.
 
-The default is 44pt, Apple's HIG minimum touch target, rather than Flutter's
-native 20: a fingertip is a contact patch roughly 40pt across, so a 20pt strip
-is only half a fingertip, and a one-handed thumb arc that lands ten pixels off
-does nothing at all — with no feedback, users just assume the feature is
-broken. 44pt is about 11% of a 393pt-wide phone, still clearly an edge gesture.
-
-To adjust it per page:
+Keep the strip narrow. The gesture layer is a **front sibling** of the page, so it
+enters the gesture arena first on hit test, and ties go to whoever resolves first
+— a touch inside the strip always beats a horizontal ListView, scrollable TabBar
+or PageView underneath, leaving that component a dead zone. To widen the strip,
+adjust it per page:
 
 ```dart
 GetPage(
   name: '/detail',
   page: () => const DetailPage(),
-  gestureWidth: (context) => 60, // strip width, defaults to 44
+  gestureWidth: (context) => 60, // strip width, defaults to 24
 );
 ```
 
-Pass `popGesture: false` on a route to turn the gesture off for that page. Note
-that it is an **edge drag**: the route only actually pops when you release past
-half the screen width, otherwise it springs back.
+If the page already has a horizontal scroller and you still want swipe-back,
+shrink the strip so it stays clear of it, or turn the gesture off for that page
+with `popGesture: false`.
+
+Sensitivity lives in the **release**, not in the strip, so it never fights those
+scrollers:
+
+- A flick of **0.5 screen widths per second** (roughly a fifth of the screen in
+  half a second) commits the pop.
+- Dragging **40%** of the screen and letting go commits it too — no need to go
+  past the halfway mark.
+- If neither is met, the page springs back.
 
 ## Navigation with named routes
 

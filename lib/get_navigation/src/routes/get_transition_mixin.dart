@@ -17,26 +17,38 @@ import '../root/get_root.dart';
 
 /// 侧滑返回的触发带宽度。
 ///
-/// Flutter 原生 `CupertinoRouteTransitionMixin` 用 20，iOS 原生的
-/// `UIScreenEdgePanGestureRecognizer` 更窄 —— 忠实照搬的结果是「不够灵敏」：
-/// 手指落点不是数学意义上的点，而是一块约 40+pt 宽的接触面，20pt 只有半个指腹，
-/// 单手握持时拇指自然弧线扫过左边缘，落点差十几像素就完全没反应，且没有任何反馈。
-/// 落空是静默失败，用户只会以为功能坏了。
+/// 这一条只能是窄的，别想加宽：手势层是页面的**前置兄弟节点**，命中测试时它先进
+/// 手势竞技场，而平局是「先 resolve 的赢」—— 手指只要落在带内，就一定压过页面里的
+/// 横向 ListView / 可滚动 TabBar / PageView。Flutter 原生 `CupertinoRouteTransitionMixin`
+/// 是同样结构，同样有这个毛病，换顺序也换不掉（`RenderStack.defaultHitTestChildren`
+/// 命中第一个就短路返回，手势层挪到页面之下会直接收不到事件，侧滑整个失效）。
 ///
-/// 44 取自 Apple HIG 的最小可点击区域（44×44pt）—— 唯一一个由平台自己定义的
-/// 「能被指腹可靠命中」的尺寸，用作起手区有明确依据。
-/// 在 393pt 宽的手机上约占 11%，仍然是明确的边缘手势，离「整页可滑」很远：
-/// Apple 直到 iOS 26 才新增整页返回手势，理由也是屏幕变大后边缘太难点。
+/// 实测触发带 44pt 时：在横向列表上往回拖，列表纹丝不动、页面反而跟着晃一下，
+/// 快速拖还会直接弹走 —— 比「误返回」更糟的是列表变成死区。20pt 时同样的拖动正常。
 ///
-/// 往宽了走的代价是不对称的，所以停在这里：
-/// - 太窄 → 静默无反应，用户放弃（代价低，但体验差）
-/// - 太宽 → 误触发返回，用户输入丢失，还抢走贴边的横向 ListView / 轮播 / 滑块手势
-///   （代价高得多）
+/// 所以灵敏度不从这里找，从 [_kMinFlingVelocity] 和 [_kPopGestureCommitFraction]
+/// 那两个「松手提交」阈值找 —— 它们只在起手成功之后起作用，跟横滑组件零冲突。
 ///
-/// 需要按页微调用 `GetPage.gestureWidth`，需要整页可滑请自行传 `limitedSwipe: false`。
-const double _kBackGestureWidth = 44.0;
+/// 24 比 Flutter 原生的 20 略宽一点，单手起手稍微宽容些，同时仍足够窄，基本不会
+/// 压在业务内容上。按页微调用 `GetPage.gestureWidth`，整页可滑传 `limitedSwipe: false`。
+const double _kBackGestureWidth = 24.0;
 
-const double _kMinFlingVelocity = 1; // Screen widths per second.
+/// 甩动判定阈值，单位「屏宽/秒」，低于它就不看速度、只按位移判定。
+///
+/// Flutter 原生是 1.0，意味着一次不紧不慢的滑动（300ms 滑 200px ≈ 0.83 屏/秒）
+/// 够不到，只能落到位移判定上，于是「明明是果断的一划，却什么都没发生」。
+/// 放宽到 0.5：仍是一次有意识的甩动（约半秒划过 1/5 屏），但不再要求用户划得又快又远。
+const double _kMinFlingVelocity = 0.5;
+
+/// 松手时判定「确认返回」的位移比例：页面被拖过屏幕的这个比例就算数。
+///
+/// Flutter 原生要求拖过半屏（0.5）才认。用户已经看着页面跟着手指走了一半却弹回去，
+/// 这是「滑不动」体感的一大来源。放宽到 0.4 仍然要求明确的意图 —— 页面跟着手走 40%
+/// 本身就是强信号 —— 但让「快到一半」的犹豫手势也能成。
+///
+/// 注意换算：controller.value 随拖动从 1.0 递减，拖过 f 时 value = 1 - f，
+/// 所以判定要写成 value > 1 - f，方向别搞反。
+const double _kPopGestureCommitFraction = 0.4;
 
 // An eyeballed value for the maximum time it takes for a page to animate
 // forward if the user releases a page mid swipe.
@@ -205,7 +217,7 @@ class GetBackGestureController<T> {
     if (velocity.abs() >= _kMinFlingVelocity) {
       animateForward = velocity <= 0;
     } else {
-      animateForward = controller.value > 0.5;
+      animateForward = controller.value > 1 - _kPopGestureCommitFraction;
     }
 
     if (animateForward) {
