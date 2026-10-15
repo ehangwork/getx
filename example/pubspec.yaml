@@ -27,7 +27,7 @@ dependency_overrides:
 dependencies:
   flutter:
     sdk: flutter
-  material_ui: 1.2.0
+  material_ui: ^1.2.0
   google_fonts:
 
   # The following adds the Cupertino Icons font to your application.
