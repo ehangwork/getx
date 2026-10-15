@@ -170,10 +170,15 @@ extension ListExtension<E> on List<E> {
 
   /// Replaces all existing items of this list with [items]
   void assignAll(Iterable<E> items) {
+    // 必须先把源物化再 clear。
+    // items 可能是派生自自身的懒视图（list.assignAll(list.where(...))），
+    // clear 之后再消费它，读到的就是空列表，整个赋值丢空；
+    // 迭代中途抛异常时也只会留下清空或半填的残骸。
+    final source = items is List<E> ? items : items.toList(growable: false);
+
     if (this is RxList) {
       (this as RxList).value.clear();
     }
-    //clear();
-    addAll(items);
+    addAll(source);
   }
 }

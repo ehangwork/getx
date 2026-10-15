@@ -119,13 +119,28 @@ class GetListenable<T> extends ListNotifierSingle implements RxInterface<T> {
 
   StreamController<T> get subject {
     if (_controller == null) {
-      _controller =
-          StreamController<T>.broadcast(onCancel: addListener(_streamListener));
+      // 挂载/摘除必须成对放在 onListen / onCancel 上。
+      // 如果把 addListener 的返回值（一个 Disposer）交给 onCancel，addListener 本身
+      // 会在建 controller 时就立即执行，监听已经挂上；而 onCancel 真正触发时
+      // controller 还在、不会重建，于是 addListener 再也不会被调用第二次，
+      // 最后一个订阅者一取消这个流就永久静默 —— 而 Obx 不走 stream，察觉不到。
+      _controller = StreamController<T>.broadcast(
+        onListen: _attachStreamListener,
+        onCancel: _detachStreamListener,
+      );
       _controller?.add(_value);
 
       ///TODO: report to controller dispose
     }
     return _controller!;
+  }
+
+  void _attachStreamListener() => addListener(_streamListener);
+
+  void _detachStreamListener() {
+    // close() 之后 stream 的收尾也可能触发 onCancel，此时不能再动已释放的监听表。
+    if (isDisposed) return;
+    removeListener(_streamListener);
   }
 
   void _streamListener() {
@@ -135,7 +150,7 @@ class GetListenable<T> extends ListNotifierSingle implements RxInterface<T> {
   @override
   @mustCallSuper
   void close() {
-    removeListener(_streamListener);
+    _detachStreamListener();
     _controller?.close();
     dispose();
   }

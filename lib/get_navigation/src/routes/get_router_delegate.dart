@@ -512,8 +512,10 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
     final route = _getRouteDecoder<T>(args);
     if (route == null) return null;
 
+    // 被丢弃的页面必须走 _popWithResult：直接 removeLast 会把它的 completer
+    // 晾在那里不完成，先前 await Get.toNamed(...) 的调用方就永久挂着。
     while (_activePages.length > 1) {
-      _activePages.removeLast();
+      _popWithResult();
     }
 
     return _replaceNamed(route);
@@ -534,7 +536,7 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
     final newPredicate = predicate ?? (route) => false;
 
     while (_activePages.length > 1 && !newPredicate(_activePages.last.route!)) {
-      _activePages.removeLast();
+      _popWithResult();
     }
 
     return _push(route);

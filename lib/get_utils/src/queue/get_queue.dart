@@ -40,11 +40,16 @@ class GetQueue {
       var item = _queue.removeAt(0);
       try {
         item.completer.complete(await item.job());
-      } on Exception catch (e) {
-        item.completer.completeError(e);
+      } catch (e, s) {
+        // 这里必须 catch 全部类型：只接 Exception 会漏掉 Error（AssertionError、
+        // 空值断言等）和裸字符串 throw。
+        item.completer.completeError(e, s);
+      } finally {
+        // 复位也必须放在 finally：一旦异常越过 catch，_active 会永远停在 true，
+        // 队列再也不排空，之后每个 add() 返回的 future 全部悬着不完成。
+        _active = false;
+        _check();
       }
-      _active = false;
-      _check();
     }
   }
 }

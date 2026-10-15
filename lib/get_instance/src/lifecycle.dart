@@ -17,7 +17,13 @@ mixin GetLifeCycleMixin {
   @protected
   @mustCallSuper
   void onInit() {
-    Engine.instance.addPostFrameCallback((_) => onReady());
+    Engine.instance.addPostFrameCallback((_) {
+      // 同一帧内创建又被销毁的 controller（重定向、offNamed 链、被替换的路由）
+      // 会先走 onClose；如果不复查就会在销毁之后再跑 onReady，
+      // 本该只对可见页面做的事情照样做了。
+      if (_isClosed) return;
+      onReady();
+    });
   }
 
   /// Called 1 frame after onInit(). It is the perfect place to enter

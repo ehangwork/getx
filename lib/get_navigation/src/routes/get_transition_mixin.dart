@@ -345,6 +345,15 @@ Cannot read the previousTitle for a route that has not yet been installed''',
     super.didChangePrevious(previousRoute);
   }
 
+  @override
+  void dispose() {
+    // _previousTitle 是在 didChangePrevious 里建出来的，不跟着路由释放的话
+    // 每条路由都会漏一个 ValueNotifier。置 null 是为了防止重复 dispose。
+    _previousTitle?.dispose();
+    _previousTitle = null;
+    super.dispose();
+  }
+
   static bool canSwipe(GetPageRoute route) =>
       route.popGesture ?? Get.defaultPopGesture ?? GetPlatform.isIOS;
 
