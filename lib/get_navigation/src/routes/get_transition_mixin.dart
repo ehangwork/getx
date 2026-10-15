@@ -377,7 +377,11 @@ Cannot read the previousTitle for a route that has not yet been installed''',
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child, {
-    bool limitedSwipe = false,
+    // 默认只在屏幕起始边缘的一条窄带内响应，与 iOS 原生一致。
+    // 若为 false，手势检测器会用 Positioned.fill 铺满整页：页面任何位置横向
+    // 拖动都触发返回，横滑 ListView / 轮播 / 滑块也会被抢走手势。
+    // 边带宽度见 gestureWidth（GetPage 可逐页覆盖）。
+    bool limitedSwipe = true,
     double initialOffset = 0,
   }) {
     // Check if the route has an animation that's currently participating

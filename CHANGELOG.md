@@ -16,6 +16,11 @@
 
 其它破坏性变更：
 
+- iOS 侧滑返回的触发区域改为**仅限屏幕起始边缘一条窄带**（约 20px，刘海屏按安全区
+  加宽），与原生一致。此前 `buildPageTransitions` 的 `limitedSwipe` 默认 false，
+  手势检测器用 `Positioned.fill` 铺满整页 —— 页面上任何位置横向拖动都会触发返回，
+  横滑 ListView / 轮播 / 滑块也会被抢走手势。需要更宽的触发带用 `GetPage.gestureWidth`
+  逐页调整。
 - `Get.backLegacy` 去掉了 `closeOverlays` 形参（浮层已不存在，该参数本就无效）。
 - `GetObserver` / `Routing` 去掉了 `isDialog` / `isBottomSheet` 字段。
 - `Get.previousRoute` 在 `didPop` 里的语义修正为「刚被弹出那一页的名称」；

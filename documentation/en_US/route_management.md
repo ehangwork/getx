@@ -1,6 +1,7 @@
 - [Route Management](#route-management)
   - [How to use](#how-to-use)
   - [Navigation without named routes](#navigation-without-named-routes)
+    - [The trigger area of the iOS swipe-back gesture](#the-trigger-area-of-the-ios-swipe-back-gesture)
   - [Navigation with named routes](#navigation-with-named-routes)
     - [Send data to named Routes](#send-data-to-named-routes)
     - [Dynamic urls links](#dynamic-urls-links)
@@ -109,6 +110,28 @@ Get.to(HomePage());
 
 
 ```
+
+### The trigger area of the iOS swipe-back gesture
+
+On iOS the swipe-back gesture is on by default and its trigger area is **only a
+narrow strip along the leading edge** of the screen (about 20px, widened by the
+safe area on notched devices), matching native behaviour — dragging anywhere
+else on the page does not trigger it, so horizontal ListViews, carousels and
+sliders keep their own gestures.
+
+To widen the strip, adjust it per page:
+
+```dart
+GetPage(
+  name: '/detail',
+  page: () => const DetailPage(),
+  gestureWidth: (context) => 40, // strip width, defaults to 20
+);
+```
+
+Pass `popGesture: false` on a route to turn the gesture off for that page. Note
+that it is an **edge drag**: the route only actually pops when you release past
+half the screen width, otherwise it springs back.
 
 ## Navigation with named routes
 
