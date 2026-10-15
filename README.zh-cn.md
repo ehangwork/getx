@@ -121,7 +121,7 @@ Flutter默认创建的 "计数器 "项目有100多行（含注释），为了展
 void main() => runApp(GetMaterialApp(home: Home()));
 ```
 
-- 注意：这并不能修改Flutter的MaterialApp，GetMaterialApp并不是修改后的MaterialApp，它只是一个预先配置的Widget，它的子组件是默认的MaterialApp。你可以手动配置，但绝对没有必要。GetMaterialApp会创建路由，注入它们，注入翻译，注入你需要的一切路由导航。如果你只用Get来进行状态管理或依赖管理，就没有必要使用GetMaterialApp。GetMaterialApp对于路由、snackbar、国际化、bottomSheet、对话框以及与路由相关的高级apis和没有上下文（context）的情况下是必要的。
+- 注意：这并不能修改Flutter的MaterialApp，GetMaterialApp并不是修改后的MaterialApp，它只是一个预先配置的Widget，它的子组件是默认的MaterialApp。你可以手动配置，但绝对没有必要。GetMaterialApp会创建路由，注入它们，注入翻译，注入你需要的一切路由导航。如果你只用Get来进行状态管理或依赖管理，就没有必要使用GetMaterialApp。GetMaterialApp对于路由、国际化以及与路由相关的高级apis和没有上下文（context）的情况下是必要的。
 - 注2: 只有当你要使用路由管理(`Get.to()`, `Get.back()`等)时才需要这一步。如果你不打算使用它，那么就不需要做第1步。
 
 - 第二步：
@@ -234,7 +234,7 @@ Obx(() => Text("${controller.name}"));
 
 ## 路由管理
 
-如果你想免上下文（context）使用路由/snackbars/dialogs/bottomsheets，GetX对你来说也是极好的，来吧展示：
+如果你想免上下文（context）使用路由，GetX对你来说也是极好的，来吧展示：
 
 在你的MaterialApp前加上 "Get"，把它变成GetMaterialApp。
 
@@ -258,7 +258,7 @@ Get.to(NextScreen());
 Get.toNamed('/details');
 ```
 
-要关闭snackbars, dialogs, bottomsheets或任何你通常会用Navigator.pop(context)关闭的东西。
+要关闭路由，或任何你通常会用Navigator.pop(context)关闭的东西。
 
 ```dart
 Get.back();
@@ -613,8 +613,8 @@ Get.width
 // 提供当前上下文。
 Get.context
 
-// 在你的代码中的任何地方，在前台提供 snackbar/dialog/bottomsheet 的上下文。
-Get.contextOverlay
+// 在你的代码中的任何地方，在前台提供 overlay 的上下文。
+Get.overlayContext
 
 // 注意：以下方法是对上下文的扩展。
 // 因为在你的UI的任何地方都可以访问上下文，你可以在UI代码的任何地方使用它。

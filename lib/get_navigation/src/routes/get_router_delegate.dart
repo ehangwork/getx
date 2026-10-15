@@ -310,10 +310,15 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
 
     if (pages.isNotEmpty) return pages;
 
-    // 历史项的末页里一个 pinRN 页都没有时，只能退化到分支内的祖先。
+    // 历史项的末页里一个 pinRN 页都没有时，退化到分支内的祖先。
     // 典型场景：历史被压成一条（Get.offAllNamed 到嵌套叶子页），
-    // 末页不是 pinRN 页，而嵌套壳 `/` 作为分支祖先必须留在根 navigator，
-    // 否则算出来是空列表 → build 退化成 ColoredBox 白屏。
+    // 末页不是 pinRN 页，而嵌套壳 `/` 作为分支祖先必须留在根 navigator。
+    //
+    // 注意：壳页自己声明 participatesInRootNavigator: false 是自相矛盾的配置 ——
+    // 「壳不进根 navigator」意味着根 navigator 没有任何页面可渲染。
+    // 这里不做兜底：把壳塞回根 navigator 会和壳自己渲染的 outlet 抢同一个
+    // GlobalKey（崩溃），比留空更糟。空列表由 build 渲染成 ColoredBox，
+    // 属于该配置本就该暴露的问题。
     return branch.where((p) => p.participatesInRootNavigator == true);
   }
 
@@ -661,6 +666,17 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
     notifyListeners();
   }
 
+  /// 用 [decoder] 覆盖 [_activePages] 的 [index] 项。
+  ///
+  /// 被顶掉的那一项连同它的 completer 会一起消失。如果不完成它，
+  /// 先前 await 该页面的调用方就永久挂起 —— 栈深为 1 时最容易命中：
+  /// offAllNamed / off 的 while 循环要求 length > 1，直接就覆盖了唯一那一项。
+  void _replaceActivePageAt(int index, RouteDecoder decoder) {
+    final completer = _activePages[index].route?.completer;
+    if (completer?.isCompleted == false) completer!.complete(null);
+    _activePages[index] = decoder;
+  }
+
   Future<T?> _replace<T>(PageSettings arguments, GetPage<T> page) async {
     final index = _activePages.length > 1 ? _activePages.length - 1 : 0;
     _routeTree.addRoute(page);
@@ -669,7 +685,7 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
 
     // final activePage = _configureRouterDecoder<T>(route!, arguments);
 
-    _activePages[index] = activePage!;
+    _replaceActivePageAt(index, activePage!);
 
     notifyListeners();
     final result = await activePage.route?.completer?.future as Future<T?>?;
@@ -681,7 +697,7 @@ class GetDelegate extends RouterDelegate<RouteDecoder>
   Future<T?> _replaceNamed<T>(RouteDecoder activePage) async {
     final index = _activePages.length > 1 ? _activePages.length - 1 : 0;
     // final activePage = _configureRouterDecoder<T>(page, arguments);
-    _activePages[index] = activePage;
+    _replaceActivePageAt(index, activePage);
 
     notifyListeners();
     final result = await activePage.route?.completer?.future as Future<T?>?;

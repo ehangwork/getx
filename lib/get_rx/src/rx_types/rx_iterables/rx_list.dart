@@ -170,10 +170,14 @@ extension ListExtension<E> on List<E> {
 
   /// Replaces all existing items of this list with [items]
   void assignAll(Iterable<E> items) {
-    // 必须先把源物化再 clear。
-    // items 可能是派生自自身的懒视图（list.assignAll(list.where(...))），
-    // clear 之后再消费它，读到的就是空列表，整个赋值丢空；
-    // 迭代中途抛异常时也只会留下清空或半填的残骸。
+    // 懒视图必须在 clear 之前物化：items 可能是派生自自身的
+    // （list.assignAll(list.where(...))），clear 之后再消费它，读到的就是空列表，
+    // 整个赋值丢空；迭代中途抛异常时也只会留下清空或半填的残骸。
+    //
+    // 已经是 List<E> 的走零拷贝快路径。注意这条路仍不覆盖自赋值 ——
+    // RxList.value 直接返回内部列表、没有拷贝，所以 list.assignAll(list.value)
+    // 里的 source 就是它自己，clear 之后 addAll 等于什么都没加。
+    // 那属于调用方把自身传进来的用法，不在这里兜。
     final source = items is List<E> ? items : items.toList(growable: false);
 
     if (this is RxList) {

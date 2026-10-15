@@ -100,13 +100,11 @@ class GetPage<T> extends Page<T> {
         );
   // settings = RouteSettings(name: name, arguments: Get.arguments);
 
-  /// 不接收方法级类型参数：copyWith 必须原样保留接收者的 T。
+  /// 返回一个 T 与接收者一致的副本。
   ///
-  /// 之前这里自己带了一个 `<T>`，于是会把 `this`（`GetPage<X>`）上的
-  /// `completer` / `children` / `onPopInvoked` 拷进另一个类型的实例 ——
-  /// 调用方只要显式指定另一个类型（`Get.toNamed<String>(...)` 之后接
-  /// `Get.offAll<String>(...)`），就会把 `Completer<dynamic>` 塞进
-  /// `Completer<String?>` 的字段，运行时抛 _TypeError。
+  /// 注意不要在这里给方法加自己的类型参数：一旦返回的 T 可以和接收者不同，
+  /// `completer` / `children` / `onPopInvoked` 就会被跨类型拷贝
+  /// （把 `Completer<dynamic>` 塞进 `Completer<String?>` 的字段），运行时抛 _TypeError。
   GetPage<T> copyWith({
     LocalKey? key,
     String? name,

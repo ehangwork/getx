@@ -6,9 +6,6 @@
     - [动态网页链接](#动态网页链接)
     - [中间件](#中间件)
   - [免context导航](#免context导航)
-    - [SnackBars](#SnackBars)
-    - [Dialogs](#dialogs)
-    - [BottomSheets](#bottomSheets)
   - [嵌套导航](#嵌套导航)
 
 # 路由管理
@@ -24,7 +21,7 @@ dependencies:
   get:
 ```
 
-如果你要在没有context的情况下使用路由/SnackBars/Dialogs/BottomSheets，或者使用高级的Get API，你只需要在你的MaterialApp前面加上 "Get"，就可以把它变成GetMaterialApp，享受吧!
+如果你要在没有context的情况下使用路由，或者使用高级的Get API，你只需要在你的MaterialApp前面加上 "Get"，就可以把它变成GetMaterialApp，享受吧!
 
 ```dart
 GetMaterialApp( // Before: MaterialApp(
@@ -40,7 +37,7 @@ GetMaterialApp( // Before: MaterialApp(
 Get.to(NextScreen());
 ```
 
-关闭SnackBars、Dialogs、BottomSheets或任何你通常会用Navigator.pop(context)关闭的东西。
+关闭路由，或任何你通常会用Navigator.pop(context)关闭的东西。
 
 ```dart
 Get.back();

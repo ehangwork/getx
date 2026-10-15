@@ -6,16 +6,19 @@ import 'package:material_ui/material_ui.dart';
 
 import '../navigation/utils/wrapper.dart';
 
-/// `GetPage.copyWith<T>` 的类型安全。
+/// `GetPage.copyWith` 的类型安全与字段继承。
 ///
-/// copyWith 原本自带一个方法级类型参数 T，返回 `GetPage<T>`。它会把 `this` 上的
-/// `completer`（`Completer<T?>`）、`children`、`onPopInvoked` 拷进新实例 ——
-/// 但 `this` 是 `GetPage<X>`。调用方一旦显式指定另一个类型
-/// （`Get.toNamed<String>(...)` 之后接 `Get.offAll<String>(...)`），
-/// 就会把 `Completer<dynamic>` 塞进 `Completer<String?>` 的字段里，运行时 _TypeError。
+/// 两个真实缺陷：
+/// 1. copyWith 里 `return GetPage(...)` 没写显式类型实参，构造器的 T 会从实参反推
+///    （传 `Completer<String?>` 就被推成 `GetPage<String>`），于是「返回类型与接收者一致」
+///    只在编译期成立；
+/// 2. `restorationId: restorationId ?? restorationId` 是自引用，copyWith 出来的页面
+///    永远拿不到原来的 restorationId。
 ///
-/// 正确做法是 copyWith 不该改接收者的类型：去掉方法级 T 之后，
-/// completer / children / onPopInvoked 都不可能被跨类型拷贝。
+/// 另外还锁住 `children` 放宽成 `List<GetPage>?` 之后，completer / children 的继承语义没变。
+///
+/// 最后一组用的是带泛型的跳转混用（`Get.toNamed<String>` 之后接 `Get.offAll<String>`）——
+/// 这是 delegate 里 `_replace` 漏传 `<T>` 时的崩溃路径。
 void main() {
   tearDown(Get.reset);
 

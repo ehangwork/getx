@@ -1,3 +1,41 @@
+## [5.0.0-release-candidate-9.4.0]
+
+**BREAKING**：移除了 bottomsheet / dialog / snackbar 三块实现，请改用 Flutter 原生 API
+（`showModalBottomSheet` / `showDialog` / `ScaffoldMessenger.showSnackBar`）。
+
+移除的公开 API：
+
+- `Get.bottomSheet` / `Get.dialog` / `Get.snackbar` / `Get.rawSnackbar` / `Get.generalDialog`
+- `Get.defaultDialog`
+- `Get.closeDialog` / `Get.closeAllDialogs` / `Get.closeBottomSheet` / `Get.closeAllBottomSheets`
+- `Get.closeSnackbar` / `Get.closeAllSnackbars` / `Get.closeCurrentSnackbar`
+- `Get.closeOverlay` / `Get.closeAllOverlays` / `Get.closeOverlays` / `Get.closeAllDialogsAndBottomSheets`
+- `Get.isDialogOpen` / `Get.isBottomSheetOpen` / `Get.isSnackbarOpen`
+- `Get.isOverlaysOpen` / `Get.isOverlaysClosed`
+- `GetSnackbar` / `GetDialog` / `GetModalBottomSheet` / `SnackbarController` 等类型
+
+其它破坏性变更：
+
+- `Get.backLegacy` 去掉了 `closeOverlays` 形参（浮层已不存在，该参数本就无效）。
+- `GetObserver` / `Routing` 去掉了 `isDialog` / `isBottomSheet` 字段。
+- `Get.previousRoute` 在 `didPop` 里的语义修正为「刚被弹出那一页的名称」；
+  之前它与 `Get.currentRoute` 取值完全相同，属于 bug。
+
+修复：
+
+- `Rx` 在最后一个 stream 订阅者取消后永久静默，`ever/listen/once` 收不到值
+  （`Obx` 不受影响，因此不易发现）。
+- `Get.offAllNamed` / `Get.offNamedUntil` 不再让被丢弃页面的 future 永久挂起；
+  `_replace` / `_replaceNamed` 覆盖栈顶时也会完成被顶掉的 completer。
+- controller 在同一帧内被销毁后不再触发 `onReady`。
+- `GetQueue` 被一个 `Error` 冻死。
+- `RxList.assignAll` 传入派生自自身的懒视图时不再丢空。
+- 路由的 `previousTitle` 不再泄漏。
+- middleware 的 redirect 循环加上「无进展即停 + 迭代上限」，避免 build 期死循环冻住界面。
+- `GetPage.copyWith` 的类型不安全（混用带泛型/不带泛型的跳转会 `_TypeError`）。
+- `GetPage.copyWith` 不再丢掉 `restorationId`。
+- 嵌套路由下 `Get.offAllNamed` 到叶子页不再白屏。
+
 ## [5.0.0-release-candidate-9.3.3]
 
 Fix flutter 3.44.0

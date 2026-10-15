@@ -126,7 +126,7 @@ The "counter" project created by default on new project on Flutter has over 100 
 void main() => runApp(GetMaterialApp(home: Home()));
 ```
 
-- Note: this does not modify the MaterialApp of the Flutter, GetMaterialApp is not a modified MaterialApp, it is just a pre-configured Widget, which has the default MaterialApp as a child. You can configure this manually, but it is definitely not necessary. GetMaterialApp will create routes, inject them, inject translations, inject everything you need for route navigation. If you use Get only for state management or dependency management, it is not necessary to use GetMaterialApp. GetMaterialApp is necessary for routes, snackbars, internationalization, bottomSheets, dialogs, and high-level apis related to routes and absence of context.
+- Note: this does not modify the MaterialApp of the Flutter, GetMaterialApp is not a modified MaterialApp, it is just a pre-configured Widget, which has the default MaterialApp as a child. You can configure this manually, but it is definitely not necessary. GetMaterialApp will create routes, inject them, inject translations, inject everything you need for route navigation. If you use Get only for state management or dependency management, it is not necessary to use GetMaterialApp. GetMaterialApp is necessary for routes, internationalization, and high-level apis related to routes and absence of context.
 - Note²: This step is only necessary if you gonna use route management (`Get.to()`, `Get.back()` and so on). If you not gonna use it then it is not necessary to do step 1
 
 - Step 2:
@@ -234,7 +234,7 @@ You will get a good idea of GetX power.
 
 ## Route management
 
-If you are going to use routes/snackbars/dialogs/bottomsheets without context, GetX is excellent for you too, just see it:
+If you are going to use routes without context, GetX is excellent for you too, just see it:
 
 Add "Get" before your MaterialApp, turning it into GetMaterialApp
 
@@ -258,7 +258,7 @@ Navigate to new screen with name. See more details on named routes [here](./docu
 Get.toNamed('/details');
 ```
 
-To close snackbars, dialogs, bottomsheets, or anything you would normally close with Navigator.pop(context);
+To close routes, or anything you would normally close with Navigator.pop(context);
 
 ```dart
 Get.back();
@@ -639,8 +639,8 @@ Get.width
 // Gives the current context of the Navigator.
 Get.context
 
-// Gives the context of the snackbar/dialog/bottomsheet in the foreground, anywhere in your code.
-Get.contextOverlay
+// Gives the context of the overlay in the foreground, anywhere in your code.
+Get.overlayContext
 
 // Note: the following methods are extensions on context. Since you
 // have access to context in any place of your UI, you can use it anywhere in the UI code

@@ -186,28 +186,24 @@ class PageRedirect {
   GetPageRoute<T> getPageToRoute<T>(
       GetPage rou, GetPage? unk, BuildContext context) {
     RouteSettings? previous;
-    var settled = false;
     for (var round = 0; round < maxRedirectRounds; round++) {
-      if (!needRecheck(context)) {
-        settled = true;
-        break;
-      }
+      if (!needRecheck(context)) break;
 
-      // 目标和上一轮完全一样说明这轮没有进展，再转下去也只是重复同一个结果。
-      if (settings?.name == previous?.name &&
-          settings?.arguments == previous?.arguments) {
-        settled = true;
+      // 只比 name：下一轮拿 settings.name 去 matchRoute，名字没变就会匹配到
+      // 同一个路由、跑同一个 middleware，对确定性的 middleware 来说必然原地打转。
+      //
+      // 不能拿 arguments 一起比 —— 上游 #3139 的形态恰恰是每轮造一个新 arguments
+      // 补路径参数，那种情况下 arguments 永远不相等，「无进展」判定形同虚设，
+      // 只能靠 maxRedirectRounds 兜底，白白多跑十几轮 build 期的 middleware。
+      if (settings?.name == previous?.name) {
+        Get.log(
+          'Redirect did not converge: "${settings?.name}" kept redirecting to '
+          'itself, stopped after $round round(s).',
+          isError: true,
+        );
         break;
       }
       previous = settings;
-    }
-
-    if (!settled) {
-      Get.log(
-        'Redirect did not settle within $maxRedirectRounds rounds, '
-        'stopped at "${settings?.name}".',
-        isError: true,
-      );
     }
 
     final r = (isUnknown ? unk : rou)!;

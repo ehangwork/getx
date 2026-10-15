@@ -32,6 +32,22 @@ class EndlessRedirector extends GetMiddleware {
   }
 }
 
+/// 固定在两个目标之间来回跳：每轮拿到的名字都在变，
+/// 「无进展」判定永远不触发，只能靠 maxRedirectRounds 兜底。
+/// 这是唯一能真正测到硬上限的形态。
+class Flipper extends GetMiddleware {
+  Flipper(this.to);
+
+  final String to;
+  int calls = 0;
+
+  @override
+  RouteSettings? redirect(String? route) {
+    calls++;
+    return RouteSettings(name: to);
+  }
+}
+
 /// 每一步都换一个新目标、真正在推进的合法链路。
 class ChainedRedirector extends GetMiddleware {
   int calls = 0;
@@ -45,7 +61,11 @@ class ChainedRedirector extends GetMiddleware {
   }
 }
 
-List<GetPage> _routes(List<GetMiddleware> forA, {List<GetMiddleware>? forTarget}) =>
+List<GetPage> _routes(
+  List<GetMiddleware> forA, {
+  List<GetMiddleware>? forTarget,
+  List<GetMiddleware>? forHop,
+}) =>
     [
       GetPage(
         name: '/',
@@ -65,6 +85,7 @@ List<GetPage> _routes(List<GetMiddleware> forA, {List<GetMiddleware>? forTarget}
       GetPage(
         name: '/b',
         page: () => const Scaffold(body: Text('b')),
+        middlewares: forHop ?? const [],
       ),
     ];
 
@@ -100,14 +121,15 @@ void main() {
     );
   });
 
-  testWidgets('迭代上限兜底：每轮都换新目标也不能无限跑', (tester) async {
-    // 每个目标页都挂同一个「总是再跳一步」的中间件，形成永不终止的推进链。
-    final mw = EndlessRedirector(200);
+  testWidgets('迭代上限：目标每轮都在变时，靠 maxRedirectRounds 兜底', (tester) async {
+    // /a → /b → /a → /b …… 每轮名字都不同，「无进展」判定不触发。
+    final toB = Flipper('/b');
+    final toA = Flipper('/a');
 
     await tester.pumpWidget(
       GetMaterialApp(
         initialRoute: '/',
-        getPages: _routes([mw], forTarget: [mw]),
+        getPages: _routes([toB], forHop: [toA]),
       ),
     );
     await settle(tester);
@@ -116,9 +138,14 @@ void main() {
     await settle(tester);
 
     expect(
-      mw.calls,
-      lessThanOrEqualTo(50),
-      reason: '必须有硬性迭代上限，不能靠调用方自己保证收敛',
+      toA.calls + toB.calls,
+      PageRedirect.maxRedirectRounds,
+      reason: '名字一直变时必须由硬上限终止，不能无限跑',
+    );
+    expect(
+      toB.calls,
+      PageRedirect.maxRedirectRounds ~/ 2,
+      reason: '两侧交替被调用，各自约占一半',
     );
   });
 

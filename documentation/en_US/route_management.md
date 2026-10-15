@@ -6,9 +6,6 @@
     - [Dynamic urls links](#dynamic-urls-links)
     - [Middleware](#middleware)
   - [Navigation without context](#navigation-without-context)
-    - [SnackBars](#snackbars)
-    - [Dialogs](#dialogs)
-    - [BottomSheets](#bottomsheets)
   - [Nested Navigation](#nested-navigation)
 
 # Route Management
@@ -24,7 +21,7 @@ dependencies:
   get:
 ```
 
-If you are going to use routes/snackbars/dialogs/bottomsheets without context, or use the high-level Get APIs, you need to simply add "Get" before your MaterialApp, turning it into GetMaterialApp and enjoy!
+If you are going to use routes without context, or use the high-level Get APIs, you need to simply add "Get" before your MaterialApp, turning it into GetMaterialApp and enjoy!
 
 ```dart
 GetMaterialApp( // Before: MaterialApp(
@@ -40,7 +37,7 @@ To navigate to a new screen:
 Get.to(NextScreen());
 ```
 
-To close snackbars, dialogs, bottomsheets, or anything you would normally close with Navigator.pop(context);
+To close routes, or anything you would normally close with Navigator.pop(context);
 
 ```dart
 Get.back();

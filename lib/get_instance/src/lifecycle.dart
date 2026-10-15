@@ -27,7 +27,7 @@ mixin GetLifeCycleMixin {
   }
 
   /// Called 1 frame after onInit(). It is the perfect place to enter
-  /// navigation events, like snackbar, dialogs, or a new route, or
+  /// navigation events, like a new route, or
   /// async request.
   void onReady() {}
 
